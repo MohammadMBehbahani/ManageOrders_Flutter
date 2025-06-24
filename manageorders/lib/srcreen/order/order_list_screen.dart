@@ -181,10 +181,12 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                     data: (orders) {
                       final filtered = orders.where((order) {
                         if (fromDate != null &&
-                            order.createdAt.isBefore(fromDate!))
+                            order.createdAt.isBefore(fromDate!)) {
                           return false;
-                        if (toDate != null && order.createdAt.isAfter(toDate!))
+                        }
+                        if (toDate != null && order.createdAt.isAfter(toDate!)) {
                           return false;
+                        }
                         return true;
                       }).toList();
 

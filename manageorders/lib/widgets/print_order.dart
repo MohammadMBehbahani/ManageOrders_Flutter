@@ -26,7 +26,7 @@ class PrintOrderWidget extends ConsumerWidget {
       400, // height in points (change based on receipt length, or set large for scroll)
       marginAll: 5, // optional margins in points
     );
-    
+
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final shortOrderId = order.id.replaceAll(RegExp(r'\D'), '');
 
@@ -88,11 +88,44 @@ class PrintOrderWidget extends ConsumerWidget {
                     style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                   ),
                   ...items.map((item) {
-                    return pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    return pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('${item.quantity} x ${item.subProductName}'),
-                        pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text(
+                              '${item.quantity} x ${item.subProductName}',
+                            ),
+                            pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+                          ],
+                        ),
+                        if (item.extras != null && item.extras!.isNotEmpty)
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: item.extras!.map((extra) {
+                                return pw.Text(
+                                  '+ Extra: ${extra.title} (£${extra.amount.toStringAsFixed(2)})',
+                                  style: const pw.TextStyle(fontSize: 9),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        if (item.toppings != null && item.toppings!.isNotEmpty)
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: item.toppings!.map((topping) {
+                                return pw.Text(
+                                  '+ Topping: ${topping.name} (£${topping.price.toStringAsFixed(2)})',
+                                  style: const pw.TextStyle(fontSize: 9),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                       ],
                     );
                   }),
@@ -101,7 +134,12 @@ class PrintOrderWidget extends ConsumerWidget {
                     children: [
                       pw.Text('Total:'),
                       pw.Text(
-                        '£${items.fold(0.0, (sum, i) => sum + i.totalPrice).toStringAsFixed(2)}',
+                        '£${items.fold(0.0, (sum, item) {
+                          final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
+                          final toppingsTotal = item.toppings?.fold(0.0, (tSum, t) => tSum + t.price) ?? 0.0;
+                          final totalPerItem = (item.unitPrice + extrasTotal + toppingsTotal) * item.quantity;
+                          return sum + totalPerItem;
+                        }).toStringAsFixed(2)}',
                       ),
                     ],
                   ),

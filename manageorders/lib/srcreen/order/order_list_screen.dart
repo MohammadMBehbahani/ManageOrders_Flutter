@@ -121,11 +121,13 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                       : null,
                   child: const Text('Print Selected'),
                 ),
+                const SizedBox(height: 20,),
                 ElevatedButton(
                   onPressed: () async => await notifier.clearAll(),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text('Clear All'),
                 ),
+                const SizedBox(height: 20,),
                 ElevatedButton(
                   onPressed: () async => _printAll(),
                   child: const Text('Print All'),

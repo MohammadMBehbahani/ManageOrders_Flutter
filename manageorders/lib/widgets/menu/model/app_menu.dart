@@ -12,15 +12,22 @@ class AppMenuItem {
   });
 }
 
-
 class AppMenuItems {
   static const List<AppMenuItem> all = [
-    AppMenuItem(title: 'Category', icon: Icons.home, routeName: '/category_screen'),
-    AppMenuItem(title: 'Extra', icon: Icons.attach_money, routeName: '/extra_screen'),
-    AppMenuItem(title: 'product_screen', icon: Icons.add, routeName: '/product_screen'),
-    AppMenuItem(title: 'Add topping', icon: Icons.add, routeName: '/topping_screen'),
-    AppMenuItem(title: 'order_screen', icon: Icons.category, routeName: '/order_screen'),
-     AppMenuItem(title: 'order_list_screen', icon: Icons.notifications, routeName: '/order_list_screen'),
-    // AppMenuItem(title: 'Profile', icon: Icons.person, routeName: '/user_profile'),
+    AppMenuItem(
+      title: 'Home',
+      icon: Icons.home,
+      routeName: '/home_screen',
+    ),
+    AppMenuItem(
+      title: 'Order List',
+      icon: Icons.list_alt,
+      routeName: '/order_list_screen',
+    ),
+    AppMenuItem(
+      title: 'Management',
+      icon: Icons.settings,
+      routeName: '/management_screen',
+    ),
   ];
 }

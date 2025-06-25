@@ -7,7 +7,6 @@ import 'package:manageorders/providers/category_provider.dart';
 import 'package:manageorders/srcreen/product/product_extra_screen.dart';
 import 'package:manageorders/srcreen/product/product_topping_screen.dart';
 import 'package:manageorders/srcreen/product/sub_product_screen.dart';
-import 'package:manageorders/srcreen/shared/layout_screen.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductScreen extends ConsumerStatefulWidget {
@@ -86,8 +85,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
      final asyncCategories = ref.watch(categoryProvider);
     final asyncProducts = ref.watch(productProvider);
 
-    return LayoutScreen(
-      title: 'Products',
+    return Scaffold(
+      appBar: AppBar(title: const Text('Products')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: asyncCategories.when(

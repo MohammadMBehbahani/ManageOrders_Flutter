@@ -10,8 +10,8 @@ import 'package:manageorders/models/discount.dart';
 import 'package:manageorders/providers/category_provider.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/order_provider.dart';
-import 'package:manageorders/srcreen/shared/layout_screen.dart';
-import 'package:flutter/gestures.dart';
+import 'package:manageorders/srcreen/order/order_panel_left.dart';
+import 'package:manageorders/srcreen/order/order_panel_right.dart';
 import 'package:manageorders/widgets/print_order.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -329,12 +329,53 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     });
   }
 
+  void onCategorySelect(String categoryId) {
+    setState(() {
+      selectedCategoryId = categoryId;
+      selectedProduct = null;
+      selectedSubProduct = null;
+      selectedExtras = [];
+      selectedToppings = [];
+    });
+  }
+
+  void onProductSelect(Product product) {
+    setState(() {
+      selectedProduct = product;
+      selectedSubProduct = null;
+      selectedExtras = [];
+      selectedToppings = [];
+    });
+  }
+
+  void onSubProductSelect(SubProductOption subProduct) {
+    setState(() => selectedSubProduct = subProduct);
+  }
+
+  void onRemoveExtra(int index) {
+    setState(() {
+      selectedExtras.removeAt(index);
+    });
+  }
+
+  void onRemoveTopping(int index) {
+    setState(() {
+      selectedToppings.removeAt(index);
+    });
+  }
+
+  void onRemoveDiscount() {
+    setState(() {
+      selectedDiscount = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoryProvider).valueOrNull ?? [];
     final products = ref.watch(productProvider).valueOrNull ?? [];
     final orderItems = ref.watch(orderProvider);
-    final filteredProducts = selectedCategoryId == null
+    final List<Product> filteredProducts = selectedCategoryId == null
         ? []
         : products.where((p) => p.categoryId == selectedCategoryId).toList();
 
@@ -364,366 +405,133 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       }
     }
 
-    return LayoutScreen(
-      title: 'Create Order',
-      body: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(
-          children: [
-            // LEFT PANEL
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: categories
-                          .map(
-                            (c) => ChoiceChip(
-                              label: Text(c.name),
-                              selected: selectedCategoryId == c.id,
-                              onSelected: (_) {
-                                setState(() {
-                                  selectedCategoryId = c.id;
-                                  selectedProduct = null;
-                                  selectedSubProduct = null;
-                                  selectedExtras = [];
-                                  selectedToppings = [];
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    const Divider(),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: filteredProducts.map((p) {
-                        final isSelected = selectedProduct?.id == p.id;
-                        return ChoiceChip(
-                          label: Text(p.name),
-                          selected: isSelected,
-                          onSelected: (_) {
-                            setState(() {
-                              selectedProduct = p;
-                              selectedSubProduct = null;
-                              selectedExtras = [];
-                              selectedToppings = [];
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const Divider(),
-                    if (selectedProduct != null) ...[
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: selectedProduct!.availableSubProducts
-                            .map(
-                              (s) => ChoiceChip(
-                                label: Text(s.name),
-                                selected: selectedSubProduct?.id == s.id,
-                                onSelected: (_) =>
-                                    setState(() => selectedSubProduct = s),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ), // ⬅️ Needed for PointerDeviceKind
-
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (selectedExtras.isNotEmpty) ...[
-                            const Padding(
-                              padding: EdgeInsets.only(top: 8),
-                              child: Text(
-                                'Selected Extras:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 120,
-                              child: ScrollConfiguration(
-                                behavior: ScrollConfiguration.of(context)
-                                    .copyWith(
-                                      dragDevices: {
-                                        PointerDeviceKind.touch,
-                                        PointerDeviceKind.mouse,
-                                      },
-                                    ),
-                                child: ListView.builder(
-                                  itemCount: selectedExtras.length,
-                                  itemBuilder: (context, index) {
-                                    final extra = selectedExtras[index];
-                                    return ListTile(
-                                      title: Text(extra.title),
-                                      subtitle: Text(
-                                        '£${extra.amount.toStringAsFixed(2)}',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            selectedExtras.removeAt(index);
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (selectedToppings.isNotEmpty) ...[
-                            const Padding(
-                              padding: EdgeInsets.only(top: 8),
-                              child: Text(
-                                'Selected Toppings:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 120,
-                              child: ScrollConfiguration(
-                                behavior: ScrollConfiguration.of(context)
-                                    .copyWith(
-                                      dragDevices: {
-                                        PointerDeviceKind.touch,
-                                        PointerDeviceKind.mouse,
-                                      },
-                                    ),
-                                child: ListView.builder(
-                                  itemCount: selectedToppings.length,
-                                  itemBuilder: (context, index) {
-                                    final topping = selectedToppings[index];
-                                    return ListTile(
-                                      title: Text(topping.name),
-                                      subtitle: Text(
-                                        '£${topping.price.toStringAsFixed(2)}',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            selectedToppings.removeAt(index);
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          ActionChip(
-                            label: const Text('+ Add Extra'),
-                            onPressed: _openExtraDialog,
-                          ),
-                          const SizedBox(height: 8),
-                          ActionChip(
-                            label: const Text('+ Add Topping'),
-                            onPressed: _openToppingDialog,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: _addCurrentItemToOrder,
-                        child: const Text('Add to Order'),
-                      ),
-                    ],
-                  ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Order')),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 1200;
+          if (isWide) {
+            return Row(
+              children: [
+                // LEFT PANEL
+                OrderLeftPanel(
+                  onAddToOrder: _addCurrentItemToOrder,
+                  onAddExtra: _openExtraDialog,
+                  onAddTopping: _openToppingDialog,
+                  categories: categories,
+                  filteredProducts: filteredProducts,
+                  selectedCategoryId: selectedCategoryId,
+                  selectedProduct: selectedProduct,
+                  selectedSubProduct: selectedSubProduct,
+                  selectedExtras: selectedExtras,
+                  selectedToppings: selectedToppings,
+                  onCategorySelect: onCategorySelect,
+                  onProductSelect: onProductSelect,
+                  onSubProductSelect: onSubProductSelect,
+                  onRemoveExtra: onRemoveExtra,
+                  onRemoveTopping: onRemoveTopping,
                 ),
-              ),
-            ),
 
-            // RIGHT PANEL (Order summary)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: orderItems.length,
-                        itemBuilder: (_, i) {
-                          final item = orderItems[i];
-                          return Card(
-                            child: ExpansionTile(
-                              title: Text(
-                                '${products.firstWhere((p) => p.id == item.productId).name} - ${item.subProductName} x${item.quantity}',
-                              ),
-                              subtitle: Text(
-                                '£${item.totalPrice.toStringAsFixed(2)}',
-                              ),
-                              children: [
-                                if (item.toppings != null &&
-                                    item.toppings!.isNotEmpty)
-                                  ...item.toppings!.map(
-                                    (t) => ListTile(
-                                      title: Text(
-                                        'Topping: ${t.name} (£${t.price.toStringAsFixed(2)})',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          final newToppings = [
-                                            ...item.toppings!,
-                                          ]..remove(t);
-                                          final updated = item.copyWith(
-                                            toppings: newToppings,
-                                          );
-                                          final updatedItems = [...orderItems];
-                                          updatedItems[i] = updated;
-                                          ref
-                                              .read(orderProvider.notifier)
-                                              .updateItems(updatedItems);
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                if (item.extras != null &&
-                                    item.extras!.isNotEmpty)
-                                  ...item.extras!.map(
-                                    (e) => ListTile(
-                                      title: Text(
-                                        'Extra: ${e.title} (£${e.amount.toStringAsFixed(2)})',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          final newExtras = [...item.extras!]
-                                            ..remove(e);
-                                          final updated = item.copyWith(
-                                            extras: newExtras,
-                                          );
-                                          final updatedItems = [...orderItems];
-                                          updatedItems[i] = updated;
-                                          ref
-                                              .read(orderProvider.notifier)
-                                              .updateItems(updatedItems);
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_forever,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () => ref
-                                      .read(orderProvider.notifier)
-                                      .removeItem(i),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    if (selectedDiscount != null)
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Discount Applied: ${selectedDiscount!.type} ${selectedDiscount!.value}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                setState(() {
-                                  selectedDiscount = null;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'Total: £${finalTotal.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isPrintChecked,
-                          onChanged: (value) {
-                            setState(() {
-                              isPrintChecked = value ?? false;
-                            });
-                          },
-                        ),
-                        const Text('Print'),
-                      ],
-                    ),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.percent),
-                          label: const Text('Add Discount'),
-                          onPressed: _openDiscountDialog,
-                        ),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.payment),
-                          label: const Text('Submit Cash'),
-                          onPressed: () async {
-                            await _submitOrder('cash');
-                          },
-                        ),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.payment),
-                          label: const Text('Submit Card'),
-                          onPressed: () async {
-                            await _submitOrder('card');
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                // RIGHT PANEL (Order summary)
+                OrderRightPanel(
+                  orderItems: orderItems,
+                  products: products,
+                  selectedDiscount: selectedDiscount,
+                  finalTotal: finalTotal,
+                  isPrintChecked: isPrintChecked,
+                  onPrintToggle: (value) =>
+                      setState(() => isPrintChecked = value ?? false),
+                  onAddDiscount: _openDiscountDialog,
+                  onRemoveDiscount: onRemoveDiscount,
+                  onSubmitCash: () async => await _submitOrder('cash'),
+                  onSubmitCard: () async => _submitOrder('card'),
+                  onRemoveItem: (index) =>
+                      ref.read(orderProvider.notifier).removeItem(index),
+                  onRemoveTopping: (itemIndex, toppingIndex) {
+                    final item = orderItems[itemIndex];
+                    final newToppings = [...item.toppings!]
+                      ..removeAt(toppingIndex);
+                    final updated = item.copyWith(toppings: newToppings);
+                    final updatedItems = [...orderItems];
+                    updatedItems[itemIndex] = updated;
+                    ref.read(orderProvider.notifier).updateItems(updatedItems);
+                  },
+                  onRemoveExtra: (itemIndex, extraIndex) {
+                    final item = orderItems[itemIndex];
+                    final newExtras = [...item.extras!]..removeAt(extraIndex);
+                    final updated = item.copyWith(extras: newExtras);
+                    final updatedItems = [...orderItems];
+                    updatedItems[itemIndex] = updated;
+                    ref.read(orderProvider.notifier).updateItems(updatedItems);
+                  },
                 ),
+              ],
+            );
+          } else {
+            return SizedBox(
+              height: constraints.maxHeight, // full screen height
+              child: Column(
+                children: [
+                  OrderLeftPanel(
+                    onAddToOrder: _addCurrentItemToOrder,
+                    onAddExtra: _openExtraDialog,
+                    onAddTopping: _openToppingDialog,
+                    categories: categories,
+                    filteredProducts: filteredProducts,
+                    selectedCategoryId: selectedCategoryId,
+                    selectedProduct: selectedProduct,
+                    selectedSubProduct: selectedSubProduct,
+                    selectedExtras: selectedExtras,
+                    selectedToppings: selectedToppings,
+                    onCategorySelect: onCategorySelect,
+                    onProductSelect: onProductSelect,
+                    onSubProductSelect: onSubProductSelect,
+                    onRemoveExtra: onRemoveExtra,
+                    onRemoveTopping: onRemoveTopping,
+                  ),
+
+                  const Divider(thickness: 2),
+                  OrderRightPanel(
+                    orderItems: orderItems,
+                    products: products,
+                    selectedDiscount: selectedDiscount,
+                    finalTotal: finalTotal,
+                    isPrintChecked: isPrintChecked,
+                    onPrintToggle: (value) =>
+                        setState(() => isPrintChecked = value ?? false),
+                    onAddDiscount: _openDiscountDialog,
+                    onRemoveDiscount: onRemoveDiscount,
+                    onSubmitCash: () async => await _submitOrder('cash'),
+                    onSubmitCard: () async => _submitOrder('card'),
+                    onRemoveItem: (index) =>
+                        ref.read(orderProvider.notifier).removeItem(index),
+                    onRemoveTopping: (itemIndex, toppingIndex) {
+                      final item = orderItems[itemIndex];
+                      final newToppings = [...item.toppings!]
+                        ..removeAt(toppingIndex);
+                      final updated = item.copyWith(toppings: newToppings);
+                      final updatedItems = [...orderItems];
+                      updatedItems[itemIndex] = updated;
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
+                    },
+                    onRemoveExtra: (itemIndex, extraIndex) {
+                      final item = orderItems[itemIndex];
+                      final newExtras = [...item.extras!]..removeAt(extraIndex);
+                      final updated = item.copyWith(extras: newExtras);
+                      final updatedItems = [...orderItems];
+                      updatedItems[itemIndex] = updated;
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
+                    },
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }

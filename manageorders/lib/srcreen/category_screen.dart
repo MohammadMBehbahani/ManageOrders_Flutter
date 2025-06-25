@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/providers/category_provider.dart';
-import 'package:manageorders/srcreen/shared/layout_screen.dart';
 
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key});
@@ -67,8 +66,8 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
   Widget build(BuildContext context) {
     final asyncCategories = ref.watch(categoryProvider);
 
-    return LayoutScreen(
-      title: 'Categories',
+    return Scaffold(
+      appBar: AppBar(title: const Text('Categories')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

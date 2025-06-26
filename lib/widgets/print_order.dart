@@ -87,11 +87,12 @@ class PrintOrderWidget extends ConsumerWidget {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        //  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text(
                               '${item.quantity} x ${item.subProductName}',
                             ),
+                            pw.SizedBox(width: 10,),
                             pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
                           ],
                         ),
@@ -125,9 +126,10 @@ class PrintOrderWidget extends ConsumerWidget {
                     );
                   }),
                   pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                   // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text('Total:'),
+                      pw.SizedBox(width: 10,),
                       pw.Text(
                         '£${items.fold(0.0, (sum, item) {
                           final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
@@ -142,9 +144,10 @@ class PrintOrderWidget extends ConsumerWidget {
                 ];
               }),
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+               // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Subtotal:'),
+                  pw.SizedBox(width: 10,),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
                 ],
               ),

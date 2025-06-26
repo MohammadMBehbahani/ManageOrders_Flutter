@@ -196,7 +196,11 @@ class OrderLeftPanel extends StatelessWidget {
                   ],
                 ],
               ),
-              if ((width < 1200 && height < 700) || height <= 350 || (width < 450 && height < 1000))
+              if ((width < 1200 && height < 700) 
+                  || height <= 350 
+                  || (width < 450 && height < 1000)
+                  || (width < 1030 && height < 690)
+              )
                 Row(
                   children: [
                     const SizedBox(height: 2),

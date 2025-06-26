@@ -315,6 +315,85 @@ class OrderLeftPanel extends StatelessWidget {
               else
                 Column(
                   children: [
+                    if (selectedExtras.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Selected Extras:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 60,
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(
+                            dragDevices: {
+                              PointerDeviceKind.touch,
+                              PointerDeviceKind.mouse,
+                            },
+                          ),
+                          child: ListView.builder(
+                            itemCount: selectedExtras.length,
+                            itemBuilder: (context, index) {
+                              final extra = selectedExtras[index];
+                              return ListTile(
+                                title: Text(extra.title),
+                                subtitle: Text(
+                                  '£${extra.amount.toStringAsFixed(2)}',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => onRemoveExtra(index),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (selectedToppings.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Selected Toppings:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 60,
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(
+                            dragDevices: {
+                              PointerDeviceKind.touch,
+                              PointerDeviceKind.mouse,
+                            },
+                          ),
+                          child: ListView.builder(
+                            itemCount: selectedToppings.length,
+                            itemBuilder: (context, index) {
+                              final topping = selectedToppings[index];
+                              return ListTile(
+                                title: Text(topping.name),
+                                subtitle: Text(
+                                  '£${topping.price.toStringAsFixed(2)}',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => onRemoveTopping(index),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 8),
                     ActionChip(
                       label: const Text('+ Add Extra'),

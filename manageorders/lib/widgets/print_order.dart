@@ -10,11 +10,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/providers/product_provider.dart';
+import 'package:collection/collection.dart';
 
 class PrintOrderWidget extends ConsumerWidget {
   final Order order;
 
   const PrintOrderWidget({super.key, required this.order});
+
+  Future<void> printdirect(Order order, List<Product> products) async {
+    final pdfBytes = await generatePdf(order, products);
+    await Printing.layoutPdf(onLayout: (_) async => pdfBytes);
+  }
 
   Future<Uint8List> generatePdf(
     Order order,
@@ -58,15 +64,7 @@ class PrintOrderWidget extends ConsumerWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Center(
-                child: pw.Text(
-                  'Caspian',
-                  style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ),
+              pw.Center(child: pw.Text('Caspian')),
               pw.SizedBox(height: 4),
               pw.Text('123 Main Street'),
               pw.Text('Suite 4B'),
@@ -78,15 +76,12 @@ class PrintOrderWidget extends ConsumerWidget {
               pw.SizedBox(height: 8),
               ...grouped.entries.expand((entry) {
                 final items = entry.value;
-                final productName = products
-                    .firstWhere((p) => p.id == entry.key)
-                    .name;
+                final productName =
+                    products.firstWhereOrNull((p) => p.id == entry.key)?.name ??
+                    '';
 
                 return [
-                  pw.Text(
-                    productName,
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text(productName),
                   ...items.map((item) {
                     return pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -149,10 +144,7 @@ class PrintOrderWidget extends ConsumerWidget {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    'Subtotal:',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text('Subtotal:'),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
                 ],
               ),
@@ -160,20 +152,14 @@ class PrintOrderWidget extends ConsumerWidget {
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
-                      'Discount ($discountText):',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                    ),
+                    pw.Text('Discount ($discountText):'),
                     pw.Text('-£${discountAmount.toStringAsFixed(2)}'),
                   ],
                 ),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    'Total:',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text('Total:'),
                   pw.Text('£${order.finalTotal.toStringAsFixed(2)}'),
                 ],
               ),

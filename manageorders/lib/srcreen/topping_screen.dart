@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/topping.dart';
 import 'package:manageorders/providers/topping_provider.dart';
-import 'package:manageorders/srcreen/shared/layout_screen.dart';
 
 class ToppingScreen extends ConsumerStatefulWidget {
   const ToppingScreen({super.key});
@@ -67,8 +66,8 @@ class _ToppingScreenState extends ConsumerState<ToppingScreen> {
   Widget build(BuildContext context) {
     final asyncTopping = ref.watch(toppingProvider);
 
-    return LayoutScreen(
-      title: 'Topping',
+    return Scaffold(
+      appBar: AppBar(title: const Text('Topping')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

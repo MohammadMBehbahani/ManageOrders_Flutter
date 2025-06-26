@@ -10,11 +10,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/providers/product_provider.dart';
+import 'package:collection/collection.dart';
 
 class PrintOrderWidget extends ConsumerWidget {
   final Order order;
 
   const PrintOrderWidget({super.key, required this.order});
+
+  Future<void> printdirect(Order order, List<Product> products) async {
+    final pdfBytes = await generatePdf(order, products);
+    await Printing.layoutPdf(onLayout: (_) async => pdfBytes);
+  }
 
   Future<Uint8List> generatePdf(
     Order order,
@@ -26,7 +32,7 @@ class PrintOrderWidget extends ConsumerWidget {
       400, // height in points (change based on receipt length, or set large for scroll)
       marginAll: 5, // optional margins in points
     );
-    
+
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final shortOrderId = order.id.replaceAll(RegExp(r'\D'), '');
 
@@ -58,15 +64,7 @@ class PrintOrderWidget extends ConsumerWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Center(
-                child: pw.Text(
-                  'Caspian',
-                  style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ),
+              pw.Center(child: pw.Text('Caspian')),
               pw.SizedBox(height: 4),
               pw.Text('123 Main Street'),
               pw.Text('Suite 4B'),
@@ -78,21 +76,51 @@ class PrintOrderWidget extends ConsumerWidget {
               pw.SizedBox(height: 8),
               ...grouped.entries.expand((entry) {
                 final items = entry.value;
-                final productName = products
-                    .firstWhere((p) => p.id == entry.key)
-                    .name;
+                final productName =
+                    products.firstWhereOrNull((p) => p.id == entry.key)?.name ??
+                    '';
 
                 return [
-                  pw.Text(
-                    productName,
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text(productName),
                   ...items.map((item) {
-                    return pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    return pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('${item.quantity} x ${item.subProductName}'),
-                        pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text(
+                              '${item.quantity} x ${item.subProductName}',
+                            ),
+                            pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+                          ],
+                        ),
+                        if (item.extras != null && item.extras!.isNotEmpty)
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: item.extras!.map((extra) {
+                                return pw.Text(
+                                  '+ Extra: ${extra.title} (£${extra.amount.toStringAsFixed(2)})',
+                                  style: const pw.TextStyle(fontSize: 9),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        if (item.toppings != null && item.toppings!.isNotEmpty)
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: item.toppings!.map((topping) {
+                                return pw.Text(
+                                  '+ Topping: ${topping.name} (£${topping.price.toStringAsFixed(2)})',
+                                  style: const pw.TextStyle(fontSize: 9),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                       ],
                     );
                   }),
@@ -101,7 +129,12 @@ class PrintOrderWidget extends ConsumerWidget {
                     children: [
                       pw.Text('Total:'),
                       pw.Text(
-                        '£${items.fold(0.0, (sum, i) => sum + i.totalPrice).toStringAsFixed(2)}',
+                        '£${items.fold(0.0, (sum, item) {
+                          final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
+                          final toppingsTotal = item.toppings?.fold(0.0, (tSum, t) => tSum + t.price) ?? 0.0;
+                          final totalPerItem = (item.unitPrice + extrasTotal + toppingsTotal) * item.quantity;
+                          return sum + totalPerItem;
+                        }).toStringAsFixed(2)}',
                       ),
                     ],
                   ),
@@ -111,10 +144,7 @@ class PrintOrderWidget extends ConsumerWidget {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    'Subtotal:',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text('Subtotal:'),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
                 ],
               ),
@@ -122,20 +152,14 @@ class PrintOrderWidget extends ConsumerWidget {
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
-                      'Discount ($discountText):',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                    ),
+                    pw.Text('Discount ($discountText):'),
                     pw.Text('-£${discountAmount.toStringAsFixed(2)}'),
                   ],
                 ),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    'Total:',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
+                  pw.Text('Total:'),
                   pw.Text('£${order.finalTotal.toStringAsFixed(2)}'),
                 ],
               ),

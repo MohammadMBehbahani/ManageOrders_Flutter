@@ -1,0 +1,29 @@
+name: Build Flutter Windows EXE
+
+on:
+  push:
+    branches: [ main ]  # Change if you're using a different branch
+  workflow_dispatch:    # This lets you run it manually from GitHub
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'  # Or match your project version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows EXE
+        run: flutter build windows
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-exe
+          path: build/windows/runner/Release/

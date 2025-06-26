@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
+import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
@@ -75,14 +76,13 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
     );
   }
 
-  // void _printDirect(Order order) async {
-  //   final pdfBytes = await PrintOrderCopyWidget(
-  //     order: order,
-  //   ).generatePdf();
-  //   await Printing.layoutPdf(onLayout: (_) async => pdfBytes);
-  // }
+  void _printDirect(Order order) async {
+    
+    final products = await ref.read(productProvider.future);
+    await PrintOrderWidget(order: order).generatePdf(order, products);
+  }
 
-  void _printAll() async{
+  void _printAll() async {
     final orders = ref.read(submittedOrdersProvider).valueOrNull ?? [];
     showDialog(
       context: context,
@@ -121,11 +121,20 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                       : null,
                   child: const Text('Print Selected'),
                 ),
+                const SizedBox(height: 20),
+                 ElevatedButton(
+                  onPressed: selectedOrder != null
+                      ? () => _printDirect(selectedOrder!)
+                      : null,
+                  child: const Text('Print direct Selected'),
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async => await notifier.clearAll(),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text('Clear All'),
                 ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async => _printAll(),
                   child: const Text('Print All'),
@@ -169,8 +178,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                             selectedOrder = null;
                           });
                           notifier.refreshOrders();
-                          
-                          },
+                        },
                         child: const Text('Clear Filter'),
                       ),
                     ],
@@ -184,7 +192,8 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                             order.createdAt.isBefore(fromDate!)) {
                           return false;
                         }
-                        if (toDate != null && order.createdAt.isAfter(toDate!)) {
+                        if (toDate != null &&
+                            order.createdAt.isAfter(toDate!)) {
                           return false;
                         }
                         return true;

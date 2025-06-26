@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/extra.dart';
 import 'package:manageorders/providers/extra_provider.dart';
-import 'package:manageorders/srcreen/shared/layout_screen.dart';
 
 class ExtraScreen extends ConsumerStatefulWidget {
   const ExtraScreen({super.key});
@@ -67,8 +66,8 @@ class _ExtraScreenState extends ConsumerState<ExtraScreen> {
   Widget build(BuildContext context) {
     final asyncCategories = ref.watch(extraProvider);
 
-    return LayoutScreen(
-      title: 'Extra',
+    return Scaffold(
+      appBar: AppBar(title: const Text('Extra')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
-import 'package:manageorders/models/product.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';

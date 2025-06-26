@@ -53,7 +53,7 @@ class OrderDatabase {
         'createdAt': order.createdAt.toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
-      print('Error submitting order: $e');
+      //print('Error submitting order: $e');
       rethrow;
     }
   }

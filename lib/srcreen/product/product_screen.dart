@@ -43,8 +43,9 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
               // Update existing
               await notifier.updateProduct(product);
             }
-
-            Navigator.of(context).pop();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
             setState(() {
               editingProduct = null;
             });
@@ -78,11 +79,9 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     );
   }
 
-
   @override
-  Widget build(BuildContext context)
-  {
-     final asyncCategories = ref.watch(categoryProvider);
+  Widget build(BuildContext context) {
+    final asyncCategories = ref.watch(categoryProvider);
     final asyncProducts = ref.watch(productProvider);
 
     return Scaffold(
@@ -100,17 +99,24 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
 
             return asyncProducts.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error loading products: $e')),
+              error: (e, _) =>
+                  Center(child: Text('Error loading products: $e')),
               data: (products) {
                 // Filter by category
                 var filteredProducts = selectedCategoryId == 'all'
                     ? products
-                    : products.where((p) => p.categoryId == selectedCategoryId).toList();
+                    : products
+                          .where((p) => p.categoryId == selectedCategoryId)
+                          .toList();
 
                 // Filter by search query
                 if (searchQuery.isNotEmpty) {
                   filteredProducts = filteredProducts
-                      .where((p) => p.name.toLowerCase().contains(searchQuery.toLowerCase()))
+                      .where(
+                        (p) => p.name.toLowerCase().contains(
+                          searchQuery.toLowerCase(),
+                        ),
+                      )
                       .toList();
                 }
 
@@ -180,7 +186,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                 final categoryName = categories
                                     .firstWhere(
                                       (c) => c.id == p.categoryId,
-                                      orElse: () => Category(id: '', name: 'Unknown'),
+                                      orElse: () =>
+                                          Category(id: '', name: 'Unknown'),
                                     )
                                     .name;
 
@@ -207,14 +214,18 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
 
                                         // Add Extra
                                         IconButton(
-                                          icon: const Icon(Icons.add_box_outlined),
+                                          icon: const Icon(
+                                            Icons.add_box_outlined,
+                                          ),
                                           tooltip: 'Add Extra',
                                           onPressed: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) =>
-                                                    AddProductExtrasScreen(product: p),
+                                                    AddProductExtrasScreen(
+                                                      product: p,
+                                                    ),
                                               ),
                                             );
                                           },
@@ -222,14 +233,18 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
 
                                         // Add Topping
                                         IconButton(
-                                          icon: const Icon(Icons.local_pizza_outlined),
+                                          icon: const Icon(
+                                            Icons.local_pizza_outlined,
+                                          ),
                                           tooltip: 'Add Topping',
                                           onPressed: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) =>
-                                                    AddProductToppingsScreen(product: p),
+                                                    AddProductToppingsScreen(
+                                                      product: p,
+                                                    ),
                                               ),
                                             );
                                           },
@@ -237,16 +252,20 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
 
                                         // Add SubProductOption
                                         IconButton(
-                                          icon: const Icon(Icons.layers_outlined),
+                                          icon: const Icon(
+                                            Icons.layers_outlined,
+                                          ),
                                           tooltip: 'Add SubProduct Option',
                                           onPressed: () => {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) =>
-                                                    AddSubProductScreen(product: p),
+                                                    AddSubProductScreen(
+                                                      product: p,
+                                                    ),
                                               ),
-                                            )
+                                            ),
                                           },
                                         ),
                                       ],
@@ -388,4 +407,3 @@ class _ProductFormModalState extends ConsumerState<ProductFormModal> {
     );
   }
 }
-

@@ -165,7 +165,7 @@ class _AddSubProductOptionsScreenState
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _deleteOption(opt),
                         ),
-                        tileColor: isNew ? Colors.green.withOpacity(0.1) : null,
+                        tileColor: isNew ? Colors.green.withAlpha((0.1 * 255).round()) : null,
                       );
                     },
                   ),

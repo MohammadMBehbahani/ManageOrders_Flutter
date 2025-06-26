@@ -39,28 +39,30 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
     );
     if (pickedDate == null) return;
 
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+    if (context.mounted) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
 
-    if (pickedTime == null) return;
+      if (pickedTime == null) return;
 
-    final fullDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
+      final fullDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
 
-    setState(() {
-      if (isFrom) {
-        fromDate = fullDateTime;
-      } else {
-        toDate = fullDateTime;
-      }
-    });
+      setState(() {
+        if (isFrom) {
+          fromDate = fullDateTime;
+        } else {
+          toDate = fullDateTime;
+        }
+      });
+    }
   }
 
   void _printOrder(Order order) {
@@ -77,7 +79,6 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
   }
 
   void _printDirect(Order order) async {
-    
     final products = await ref.read(productProvider.future);
     await PrintOrderWidget(order: order).generatePdf(order, products);
   }
@@ -122,7 +123,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                   child: const Text('Print Selected'),
                 ),
                 const SizedBox(height: 20),
-                 ElevatedButton(
+                ElevatedButton(
                   onPressed: selectedOrder != null
                       ? () => _printDirect(selectedOrder!)
                       : null,

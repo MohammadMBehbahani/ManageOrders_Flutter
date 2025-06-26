@@ -7,6 +7,7 @@
       "name": "manageorders",
       "version": "1.0.0+1",
       "dependencies": [
+        "collection",
         "cupertino_icons",
         "flutter",
         "flutter_riverpod",
@@ -56,6 +57,11 @@
         "vector_math",
         "vm_service"
       ]
+    },
+    {
+      "name": "collection",
+      "version": "1.19.1",
+      "dependencies": []
     },
     {
       "name": "pdf",
@@ -221,11 +227,6 @@
         "path",
         "vm_service"
       ]
-    },
-    {
-      "name": "collection",
-      "version": "1.19.1",
-      "dependencies": []
     },
     {
       "name": "characters",

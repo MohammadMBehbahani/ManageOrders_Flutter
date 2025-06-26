@@ -2,23 +2,35 @@ name: Build Flutter Windows EXE
 
 on:
   push:
-    branches: [ main ]  # or your branch
+    branches: [ main ]  # change to your target branch if needed
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.32.0' # or your Flutter version
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-    - run: flutter pub get
-    - run: flutter build windows
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: windows-exe
-        path: build/windows/runner/Release/
+      - name: Run flutter pub get
+        run: flutter pub get
+
+      - name: Enable Windows desktop support (if needed)
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Flutter Windows App (Release mode)
+        run: flutter build windows --release
+
+      - name: Show build output (for debugging)
+        run: dir build\windows\runner\Release
+
+      - name: Upload Windows EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: build/windows/runner/Release/

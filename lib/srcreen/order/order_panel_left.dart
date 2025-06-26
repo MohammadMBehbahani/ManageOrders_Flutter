@@ -112,115 +112,205 @@ class OrderLeftPanel extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (selectedExtras.isNotEmpty) ...[
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Selected Extras:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 60,
-                      child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          dragDevices: {
-                            PointerDeviceKind.touch,
-                            PointerDeviceKind.mouse,
-                          },
-                        ),
-                        child: ListView.builder(
-                          itemCount: selectedExtras.length,
-                          itemBuilder: (context, index) {
-                            final extra = selectedExtras[index];
-                            return ListTile(
-                              title: Text(extra.title),
-                              subtitle: Text(
-                                '£${extra.amount.toStringAsFixed(2)}',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onRemoveExtra(index),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (selectedToppings.isNotEmpty) ...[
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Selected Toppings:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 60,
-                      child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          dragDevices: {
-                            PointerDeviceKind.touch,
-                            PointerDeviceKind.mouse,
-                          },
-                        ),
-                        child: ListView.builder(
-                          itemCount: selectedToppings.length,
-                          itemBuilder: (context, index) {
-                            final topping = selectedToppings[index];
-                            return ListTile(
-                              title: Text(topping.name),
-                              subtitle: Text(
-                                '£${topping.price.toStringAsFixed(2)}',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onRemoveTopping(index),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              if (width < 1200 
-                  // || height <= 350 
-                  // || (width < 450 && height < 1000)
-                  // || (width < 1030 && height < 690)
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     if (selectedExtras.isNotEmpty) ...[
+              //       const Padding(
+              //         padding: EdgeInsets.only(top: 8),
+              //         child: Text(
+              //           'Selected Extras:',
+              //           style: TextStyle(fontWeight: FontWeight.bold),
+              //         ),
+              //       ),
+              //       SizedBox(
+              //         height: 60,
+              //         child: ScrollConfiguration(
+              //           behavior: ScrollConfiguration.of(context).copyWith(
+              //             dragDevices: {
+              //               PointerDeviceKind.touch,
+              //               PointerDeviceKind.mouse,
+              //             },
+              //           ),
+              //           child: ListView.builder(
+              //             itemCount: selectedExtras.length,
+              //             itemBuilder: (context, index) {
+              //               final extra = selectedExtras[index];
+              //               return ListTile(
+              //                 title: Text(extra.title),
+              //                 subtitle: Text(
+              //                   '£${extra.amount.toStringAsFixed(2)}',
+              //                 ),
+              //                 trailing: IconButton(
+              //                   icon: const Icon(
+              //                     Icons.delete,
+              //                     color: Colors.red,
+              //                   ),
+              //                   onPressed: () => onRemoveExtra(index),
+              //                 ),
+              //               );
+              //             },
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //     if (selectedToppings.isNotEmpty) ...[
+              //       const Padding(
+              //         padding: EdgeInsets.only(top: 8),
+              //         child: Text(
+              //           'Selected Toppings:',
+              //           style: TextStyle(fontWeight: FontWeight.bold),
+              //         ),
+              //       ),
+              //       SizedBox(
+              //         height: 60,
+              //         child: ScrollConfiguration(
+              //           behavior: ScrollConfiguration.of(context).copyWith(
+              //             dragDevices: {
+              //               PointerDeviceKind.touch,
+              //               PointerDeviceKind.mouse,
+              //             },
+              //           ),
+              //           child: ListView.builder(
+              //             itemCount: selectedToppings.length,
+              //             itemBuilder: (context, index) {
+              //               final topping = selectedToppings[index];
+              //               return ListTile(
+              //                 title: Text(topping.name),
+              //                 subtitle: Text(
+              //                   '£${topping.price.toStringAsFixed(2)}',
+              //                 ),
+              //                 trailing: IconButton(
+              //                   icon: const Icon(
+              //                     Icons.delete,
+              //                     color: Colors.red,
+              //                   ),
+              //                   onPressed: () => onRemoveTopping(index),
+              //                 ),
+              //               );
+              //             },
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ],
+              // ),
+              if (width < 1200
+              // || height <= 350
+              // || (width < 450 && height < 1000)
+              // || (width < 1030 && height < 690)
               )
-                Row(
-                  children: [
-                    const SizedBox(height: 2),
-                    ActionChip(
-                      label: const Text('+ Add Extra'),
-                      onPressed: onAddExtra,
-                    ),
-                    const SizedBox(width: 2),
-                    ActionChip(
-                      label: const Text('+ Add Topping'),
-                      onPressed: onAddTopping,
-                    ),
-                    const SizedBox(width: 2),
-                    ElevatedButton(
-                      onPressed: onAddToOrder,
-                      child: const Text(
-                        'Add Order',
-                        style: TextStyle(fontSize: 20),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Buttons group
+                      Row(
+                        children: [
+                          ActionChip(
+                            label: const Text('+ Add Extra'),
+                            onPressed: onAddExtra,
+                          ),
+                          const SizedBox(width: 8),
+                          ActionChip(
+                            label: const Text('+ Add Topping'),
+                            onPressed: onAddTopping,
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: onAddToOrder,
+                            child: const Text(
+                              'Add Order',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(width: 16),
+
+                      // Selected Extras
+                      if (selectedExtras.isNotEmpty) ...[
+                        const Text(
+                          'Extras:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 200,
+                          height: 70,
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(
+                              dragDevices: {
+                                PointerDeviceKind.touch,
+                                PointerDeviceKind.mouse,
+                              },
+                            ),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: selectedExtras.map((extra) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Chip(
+                                      label: Text(
+                                        '${extra.title} (£${extra.amount.toStringAsFixed(2)})',
+                                      ),
+                                      deleteIcon: const Icon(Icons.close),
+                                      onDeleted: () => onRemoveExtra(
+                                        selectedExtras.indexOf(extra),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(width: 16),
+
+                      // Selected Toppings
+                      if (selectedToppings.isNotEmpty) ...[
+                        const Text(
+                          'Toppings:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 200,
+                          height: 70,
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(
+                              dragDevices: {
+                                PointerDeviceKind.touch,
+                                PointerDeviceKind.mouse,
+                              },
+                            ),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: selectedToppings.map((topping) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Chip(
+                                      label: Text(
+                                        '${topping.name} (£${topping.price.toStringAsFixed(2)})',
+                                      ),
+                                      deleteIcon: const Icon(Icons.close),
+                                      onDeleted: () => onRemoveTopping(
+                                        selectedToppings.indexOf(topping),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 )
               else
                 Column(

@@ -95,6 +95,7 @@ class PrintAllOrdersWidget extends StatelessWidget {
       children: [
         pw.Text(title),
         pw.Text(value),
+        pw.SizedBox(height: 8),
       ],
     );
   }

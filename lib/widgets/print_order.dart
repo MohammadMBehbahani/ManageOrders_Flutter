@@ -153,7 +153,7 @@ class PrintOrderWidget extends ConsumerWidget {
                 children: [
                   pw.Text('Subtotal:'),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
-                  pw.SizedBox(height: 8),
+                  pw.SizedBox(height: 10),
                 ],
               ),
               if (order.discount != null)

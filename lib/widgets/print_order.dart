@@ -20,9 +20,11 @@ class PrintOrderWidget extends ConsumerWidget {
 
   Future<void> printdirect(Order order, List<Product> products) async {
     final pdfBytes = await generatePdf(order, products);
-    await File('output.pdf').writeAsBytes(pdfBytes);
 
-    await Process.run('cmd', ['/c', 'start', '/min', '', 'output.pdf', '/p']);
+    final output = File('receipt.pdf');
+    await output.writeAsBytes(pdfBytes);
+
+    await Process.run('cmd', ['/c', 'start', '/min', '', 'receipt.pdf', '/p']);
   }
 
   Future<Uint8List> generatePdf(
@@ -90,13 +92,13 @@ class PrintOrderWidget extends ConsumerWidget {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Row(
-                          //  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text(
                               '${item.quantity} x ${item.subProductName}',
                             ),
-                            pw.SizedBox(width: 10),
                             pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+                            pw.SizedBox(height: 8),
                           ],
                         ),
                         if (item.extras != null && item.extras!.isNotEmpty)
@@ -129,10 +131,9 @@ class PrintOrderWidget extends ConsumerWidget {
                     );
                   }),
                   pw.Row(
-                    // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text('Total:'),
-                      pw.SizedBox(width: 10),
                       pw.Text(
                         '£${items.fold(0.0, (sum, item) {
                           final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
@@ -141,17 +142,18 @@ class PrintOrderWidget extends ConsumerWidget {
                           return sum + totalPerItem;
                         }).toStringAsFixed(2)}',
                       ),
+                      pw.SizedBox(height: 8),
                     ],
                   ),
                   pw.Divider(),
                 ];
               }),
               pw.Row(
-                // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Subtotal:'),
-                  pw.SizedBox(width: 10),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
+                  pw.SizedBox(height: 8),
                 ],
               ),
               if (order.discount != null)
@@ -160,6 +162,7 @@ class PrintOrderWidget extends ConsumerWidget {
                   children: [
                     pw.Text('Discount ($discountText):'),
                     pw.Text('-£${discountAmount.toStringAsFixed(2)}'),
+                    pw.SizedBox(height: 8),
                   ],
                 ),
               pw.Row(
@@ -167,6 +170,7 @@ class PrintOrderWidget extends ConsumerWidget {
                 children: [
                   pw.Text('Total:'),
                   pw.Text('£${order.finalTotal.toStringAsFixed(2)}'),
+                  pw.SizedBox(height: 8),
                 ],
               ),
               pw.SizedBox(height: 8),

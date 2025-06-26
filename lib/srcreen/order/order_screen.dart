@@ -410,127 +410,131 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= 1200;
-          if (isWide) {
-            return Row(
-              children: [
-                // LEFT PANEL
-                OrderLeftPanel(
-                  onAddToOrder: _addCurrentItemToOrder,
-                  onAddExtra: _openExtraDialog,
-                  onAddTopping: _openToppingDialog,
-                  categories: categories,
-                  filteredProducts: filteredProducts,
-                  selectedCategoryId: selectedCategoryId,
-                  selectedProduct: selectedProduct,
-                  selectedSubProduct: selectedSubProduct,
-                  selectedExtras: selectedExtras,
-                  selectedToppings: selectedToppings,
-                  onCategorySelect: onCategorySelect,
-                  onProductSelect: onProductSelect,
-                  onSubProductSelect: onSubProductSelect,
-                  onRemoveExtra: onRemoveExtra,
-                  onRemoveTopping: onRemoveTopping,
-                ),
+           Size screenSize = MediaQuery.of(context).size;
+            final width = screenSize.width;
+            final height = screenSize.height;
+          return Center(child: Text('width: $width height: $height'));
+          // if (isWide) {
+          //   return Row(
+          //     children: [
+          //       // LEFT PANEL
+          //       OrderLeftPanel(
+          //         onAddToOrder: _addCurrentItemToOrder,
+          //         onAddExtra: _openExtraDialog,
+          //         onAddTopping: _openToppingDialog,
+          //         categories: categories,
+          //         filteredProducts: filteredProducts,
+          //         selectedCategoryId: selectedCategoryId,
+          //         selectedProduct: selectedProduct,
+          //         selectedSubProduct: selectedSubProduct,
+          //         selectedExtras: selectedExtras,
+          //         selectedToppings: selectedToppings,
+          //         onCategorySelect: onCategorySelect,
+          //         onProductSelect: onProductSelect,
+          //         onSubProductSelect: onSubProductSelect,
+          //         onRemoveExtra: onRemoveExtra,
+          //         onRemoveTopping: onRemoveTopping,
+          //       ),
 
-                // RIGHT PANEL (Order summary)
-                OrderRightPanel(
-                  orderItems: orderItems,
-                  products: products,
-                  selectedDiscount: selectedDiscount,
-                  finalTotal: finalTotal,
-                  isPrintChecked: isPrintChecked,
-                  onPrintToggle: (value) =>
-                      setState(() => isPrintChecked = value ?? false),
-                  onAddDiscount: _openDiscountDialog,
-                  onRemoveDiscount: onRemoveDiscount,
-                  onSubmitCash: () async => await _submitOrder('cash'),
-                  onSubmitCard: () async => _submitOrder('card'),
-                  onRemoveItem: (index) =>
-                      ref.read(orderProvider.notifier).removeItem(index),
-                  onRemoveTopping: (itemIndex, toppingIndex) {
-                    final item = orderItems[itemIndex];
-                    final newToppings = [...item.toppings!]
-                      ..removeAt(toppingIndex);
-                    final updated = item.copyWith(toppings: newToppings);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
-                  onRemoveExtra: (itemIndex, extraIndex) {
-                    final item = orderItems[itemIndex];
-                    final newExtras = [...item.extras!]..removeAt(extraIndex);
-                    final updated = item.copyWith(extras: newExtras);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
-                ),
-              ],
-            );
-          } else {
-            return SizedBox(
-              height: constraints.maxHeight, // full screen height
-              child: Column(
-                children: [
-                  OrderLeftPanel(
-                    onAddToOrder: _addCurrentItemToOrder,
-                    onAddExtra: _openExtraDialog,
-                    onAddTopping: _openToppingDialog,
-                    categories: categories,
-                    filteredProducts: filteredProducts,
-                    selectedCategoryId: selectedCategoryId,
-                    selectedProduct: selectedProduct,
-                    selectedSubProduct: selectedSubProduct,
-                    selectedExtras: selectedExtras,
-                    selectedToppings: selectedToppings,
-                    onCategorySelect: onCategorySelect,
-                    onProductSelect: onProductSelect,
-                    onSubProductSelect: onSubProductSelect,
-                    onRemoveExtra: onRemoveExtra,
-                    onRemoveTopping: onRemoveTopping,
-                  ),
+          //       // RIGHT PANEL (Order summary)
+          //       OrderRightPanel(
+          //         orderItems: orderItems,
+          //         products: products,
+          //         selectedDiscount: selectedDiscount,
+          //         finalTotal: finalTotal,
+          //         isPrintChecked: isPrintChecked,
+          //         onPrintToggle: (value) =>
+          //             setState(() => isPrintChecked = value ?? false),
+          //         onAddDiscount: _openDiscountDialog,
+          //         onRemoveDiscount: onRemoveDiscount,
+          //         onSubmitCash: () async => await _submitOrder('cash'),
+          //         onSubmitCard: () async => _submitOrder('card'),
+          //         onRemoveItem: (index) =>
+          //             ref.read(orderProvider.notifier).removeItem(index),
+          //         onRemoveTopping: (itemIndex, toppingIndex) {
+          //           final item = orderItems[itemIndex];
+          //           final newToppings = [...item.toppings!]
+          //             ..removeAt(toppingIndex);
+          //           final updated = item.copyWith(toppings: newToppings);
+          //           final updatedItems = [...orderItems];
+          //           updatedItems[itemIndex] = updated;
+          //           ref.read(orderProvider.notifier).updateItems(updatedItems);
+          //         },
+          //         onRemoveExtra: (itemIndex, extraIndex) {
+          //           final item = orderItems[itemIndex];
+          //           final newExtras = [...item.extras!]..removeAt(extraIndex);
+          //           final updated = item.copyWith(extras: newExtras);
+          //           final updatedItems = [...orderItems];
+          //           updatedItems[itemIndex] = updated;
+          //           ref.read(orderProvider.notifier).updateItems(updatedItems);
+          //         },
+          //       ),
+          //     ],
+          //   );
+          // } else {
+          //   return SizedBox(
+          //     height: constraints.maxHeight, // full screen height
+          //     child: Column(
+          //       children: [
+          //         OrderLeftPanel(
+          //           onAddToOrder: _addCurrentItemToOrder,
+          //           onAddExtra: _openExtraDialog,
+          //           onAddTopping: _openToppingDialog,
+          //           categories: categories,
+          //           filteredProducts: filteredProducts,
+          //           selectedCategoryId: selectedCategoryId,
+          //           selectedProduct: selectedProduct,
+          //           selectedSubProduct: selectedSubProduct,
+          //           selectedExtras: selectedExtras,
+          //           selectedToppings: selectedToppings,
+          //           onCategorySelect: onCategorySelect,
+          //           onProductSelect: onProductSelect,
+          //           onSubProductSelect: onSubProductSelect,
+          //           onRemoveExtra: onRemoveExtra,
+          //           onRemoveTopping: onRemoveTopping,
+          //         ),
 
-                  const Divider(thickness: 2),
-                  OrderRightPanel(
-                    orderItems: orderItems,
-                    products: products,
-                    selectedDiscount: selectedDiscount,
-                    finalTotal: finalTotal,
-                    isPrintChecked: isPrintChecked,
-                    onPrintToggle: (value) =>
-                        setState(() => isPrintChecked = value ?? false),
-                    onAddDiscount: _openDiscountDialog,
-                    onRemoveDiscount: onRemoveDiscount,
-                    onSubmitCash: () async => await _submitOrder('cash'),
-                    onSubmitCard: () async => _submitOrder('card'),
-                    onRemoveItem: (index) =>
-                        ref.read(orderProvider.notifier).removeItem(index),
-                    onRemoveTopping: (itemIndex, toppingIndex) {
-                      final item = orderItems[itemIndex];
-                      final newToppings = [...item.toppings!]
-                        ..removeAt(toppingIndex);
-                      final updated = item.copyWith(toppings: newToppings);
-                      final updatedItems = [...orderItems];
-                      updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
-                    },
-                    onRemoveExtra: (itemIndex, extraIndex) {
-                      final item = orderItems[itemIndex];
-                      final newExtras = [...item.extras!]..removeAt(extraIndex);
-                      final updated = item.copyWith(extras: newExtras);
-                      final updatedItems = [...orderItems];
-                      updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
-                    },
-                  ),
-                ],
-              ),
-            );
-          }
+          //         const Divider(thickness: 2),
+          //         OrderRightPanel(
+          //           orderItems: orderItems,
+          //           products: products,
+          //           selectedDiscount: selectedDiscount,
+          //           finalTotal: finalTotal,
+          //           isPrintChecked: isPrintChecked,
+          //           onPrintToggle: (value) =>
+          //               setState(() => isPrintChecked = value ?? false),
+          //           onAddDiscount: _openDiscountDialog,
+          //           onRemoveDiscount: onRemoveDiscount,
+          //           onSubmitCash: () async => await _submitOrder('cash'),
+          //           onSubmitCard: () async => _submitOrder('card'),
+          //           onRemoveItem: (index) =>
+          //               ref.read(orderProvider.notifier).removeItem(index),
+          //           onRemoveTopping: (itemIndex, toppingIndex) {
+          //             final item = orderItems[itemIndex];
+          //             final newToppings = [...item.toppings!]
+          //               ..removeAt(toppingIndex);
+          //             final updated = item.copyWith(toppings: newToppings);
+          //             final updatedItems = [...orderItems];
+          //             updatedItems[itemIndex] = updated;
+          //             ref
+          //                 .read(orderProvider.notifier)
+          //                 .updateItems(updatedItems);
+          //           },
+          //           onRemoveExtra: (itemIndex, extraIndex) {
+          //             final item = orderItems[itemIndex];
+          //             final newExtras = [...item.extras!]..removeAt(extraIndex);
+          //             final updated = item.copyWith(extras: newExtras);
+          //             final updatedItems = [...orderItems];
+          //             updatedItems[itemIndex] = updated;
+          //             ref
+          //                 .read(orderProvider.notifier)
+          //                 .updateItems(updatedItems);
+          //           },
+          //         ),
+          //       ],
+          //     ),
+          //   );
+          // }
         },
       ),
     );

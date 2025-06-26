@@ -2,7 +2,7 @@ name: Build Flutter Windows EXE
 
 on:
   push:
-    branches: [ main ]  # change to your target branch if needed
+    branches: [ main ]  # change to your branch if needed
 
 jobs:
   build:
@@ -17,19 +17,23 @@ jobs:
         with:
           flutter-version: '3.32.0'
 
-      - name: Run flutter pub get
-        run: flutter pub get
-
-      - name: Enable Windows desktop support (if needed)
+      - name: Enable Windows support
         run: flutter config --enable-windows-desktop
 
-      - name: Build Flutter Windows App (Release mode)
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows app
         run: flutter build windows --release
 
-      - name: Show build output (for debugging)
-        run: dir build\windows\runner\Release
+      - name: Debug: Show Windows build directory structure
+        continue-on-error: true
+        run: |
+          echo "Listing full build/windows directory:"
+          dir build\windows /s
 
       - name: Upload Windows EXE Artifact
+        if: success()  # Only attempt if previous steps didn’t fail
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe

@@ -2,7 +2,7 @@ name: Build Flutter Windows EXE
 
 on:
   push:
-    branches: [ main ]  # change to your branch if needed
+    branches: [ main ]  # or use your actual branch
 
 jobs:
   build:
@@ -28,12 +28,10 @@ jobs:
 
       - name: Debug: Show Windows build directory structure
         continue-on-error: true
-        run: |
-          echo "Listing full build/windows directory:"
-          dir build\windows /s
+        run: Get-ChildItem -Recurse .\build\windows
 
       - name: Upload Windows EXE Artifact
-        if: success()  # Only attempt if previous steps didn’t fail
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe

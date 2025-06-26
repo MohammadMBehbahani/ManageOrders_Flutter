@@ -2,14 +2,14 @@ name: Build Flutter Windows EXE
 
 on:
   push:
-    branches: [ main ]  # or use your actual branch
+    branches: [main] # Update this if you're using another branch like "testwin"
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout source code
         uses: actions/checkout@v3
 
       - name: Setup Flutter
@@ -23,15 +23,13 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Windows app
+      - name: Build Windows EXE
         run: flutter build windows --release
 
-      - name: Debug: Show Windows build directory structure
-        continue-on-error: true
-        run: Get-ChildItem -Recurse .\build\windows
+      - name: Check build output
+        run: dir build\windows\runner\Release
 
-      - name: Upload Windows EXE Artifact
-        if: success()
+      - name: Upload Windows EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe

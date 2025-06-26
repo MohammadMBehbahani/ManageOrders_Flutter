@@ -26,7 +26,7 @@ jobs:
         run: flutter build windows
 
       - name: Upload EXE as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: my_flutter_app_windows
           path: build/windows/runner/Release/

@@ -11,6 +11,7 @@ import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:collection/collection.dart';
+import 'dart:io';
 
 class PrintOrderWidget extends ConsumerWidget {
   final Order order;
@@ -19,7 +20,9 @@ class PrintOrderWidget extends ConsumerWidget {
 
   Future<void> printdirect(Order order, List<Product> products) async {
     final pdfBytes = await generatePdf(order, products);
-    await Printing.layoutPdf(onLayout: (_) async => pdfBytes);
+    await File('output.pdf').writeAsBytes(pdfBytes);
+
+    await Process.run('cmd', ['/c', 'start', '/min', '', 'output.pdf', '/p']);
   }
 
   Future<Uint8List> generatePdf(
@@ -87,12 +90,12 @@ class PrintOrderWidget extends ConsumerWidget {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Row(
-                        //  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          //  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text(
                               '${item.quantity} x ${item.subProductName}',
                             ),
-                            pw.SizedBox(width: 10,),
+                            pw.SizedBox(width: 10),
                             pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
                           ],
                         ),
@@ -126,10 +129,10 @@ class PrintOrderWidget extends ConsumerWidget {
                     );
                   }),
                   pw.Row(
-                   // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text('Total:'),
-                      pw.SizedBox(width: 10,),
+                      pw.SizedBox(width: 10),
                       pw.Text(
                         '£${items.fold(0.0, (sum, item) {
                           final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
@@ -144,10 +147,10 @@ class PrintOrderWidget extends ConsumerWidget {
                 ];
               }),
               pw.Row(
-               // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                // mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Subtotal:'),
-                  pw.SizedBox(width: 10,),
+                  pw.SizedBox(width: 10),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
                 ],
               ),

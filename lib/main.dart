@@ -8,12 +8,12 @@ import 'package:manageorders/srcreen/order/order_list_screen.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/product/product_screen.dart';
 import 'package:manageorders/srcreen/topping_screen.dart';
-import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // Make app fullscreen and remove system UI overlays (status bar, nav bar)
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
   runApp(const ProviderScope(child: ManageOrdersApp()));
 }
 

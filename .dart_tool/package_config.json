@@ -278,6 +278,12 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "sqflite_common_ffi",
+      "rootUri": "file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_common_ffi-2.3.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
       "name": "sqflite_darwin",
       "rootUri": "file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2",
       "packageUri": "lib/",
@@ -286,6 +292,12 @@
     {
       "name": "sqflite_platform_interface",
       "rootUri": "file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_platform_interface-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "sqlite3",
+      "rootUri": "file:///Users/mamo/.pub-cache/hosted/pub.dev/sqlite3-2.7.6",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },

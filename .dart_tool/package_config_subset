@@ -166,6 +166,10 @@ sqflite_common
 3.7
 file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_common-2.5.5/
 file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_common-2.5.5/lib/
+sqflite_common_ffi
+3.7
+file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_common_ffi-2.3.6/
+file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_common_ffi-2.3.6/lib/
 sqflite_darwin
 3.7
 file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
@@ -174,6 +178,10 @@ sqflite_platform_interface
 3.5
 file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_platform_interface-2.4.0/
 file:///Users/mamo/.pub-cache/hosted/pub.dev/sqflite_platform_interface-2.4.0/lib/
+sqlite3
+3.5
+file:///Users/mamo/.pub-cache/hosted/pub.dev/sqlite3-2.7.6/
+file:///Users/mamo/.pub-cache/hosted/pub.dev/sqlite3-2.7.6/lib/
 stack_trace
 3.4
 file:///Users/mamo/.pub-cache/hosted/pub.dev/stack_trace-1.12.1/

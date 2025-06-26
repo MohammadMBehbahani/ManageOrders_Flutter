@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order_extra.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/sub_product_option.dart';
-import 'package:manageorders/models/extra.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/models/order_topping.dart';
 import 'package:manageorders/models/discount.dart';

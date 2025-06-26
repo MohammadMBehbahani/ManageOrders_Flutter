@@ -47,7 +47,6 @@ class OrderLeftPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
     final width = screenSize.width;
-    final height = screenSize.height;
 
     return Expanded(
       child: Padding(

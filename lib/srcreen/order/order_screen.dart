@@ -8,8 +8,10 @@ import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/models/order_topping.dart';
 import 'package:manageorders/models/discount.dart';
 import 'package:manageorders/providers/category_provider.dart';
+import 'package:manageorders/providers/extra_provider.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/order_provider.dart';
+import 'package:manageorders/providers/topping_provider.dart';
 import 'package:manageorders/srcreen/order/order_panel_left.dart';
 import 'package:manageorders/srcreen/order/order_panel_right.dart';
 import 'package:manageorders/widgets/print_order.dart';
@@ -78,19 +80,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   // Add Topping dialog
   Future<void> _openToppingDialog() async {
-    final products = ref.read(productProvider).valueOrNull ?? [];
-    // collect all unique toppings from all products
-    final Map<String, OrderTopping> availableToppingsMap = {};
-    for (var p in products) {
-      for (var t in p.availableToppings) {
-        availableToppingsMap[t.id] = OrderTopping(
-          toppingId: t.id,
-          name: t.name,
-          price: 0,
-        );
-      }
-    }
-    final availableToppings = availableToppingsMap.values.toList();
+    final toppingList = await ref.watch(toppingProvider.future);
+    final availableToppings = toppingList
+        .map((t) => OrderTopping(toppingId: t.id, name: t.name, price: 0))
+        .toList();
 
     String? selectedToppingId;
     final toppingNameController = TextEditingController();
@@ -181,15 +174,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   // Add Extra dialog
   Future<void> _openExtraDialog() async {
-    final products = ref.read(productProvider).valueOrNull ?? [];
-    // collect all unique extras from all products
-    final Map<String, Extra> availableExtrasMap = {};
-    for (var p in products) {
-      for (var e in p.availableExtras) {
-        availableExtrasMap[e.id] = e;
-      }
-    }
-    final availableExtras = availableExtrasMap.values.toList();
+    final availableExtras = await ref.watch(extraProvider.future);
 
     String? selectedExtraId;
     final extraNameController = TextEditingController();
@@ -262,8 +247,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         ),
       ),
     );
+
     if (addedExtra) {
-      setState(() {}); // rebuild outer widget to show updated list
+      setState(() {}); // rebuild to show updated list
     }
   }
 

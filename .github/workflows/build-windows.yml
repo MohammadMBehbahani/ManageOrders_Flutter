@@ -1,32 +1,24 @@
-name: Build Windows EXE
+name: Build Flutter Windows EXE
 
 on:
-  workflow_dispatch:  # Manual trigger via GitHub UI
+  push:
+    branches: [ main ]  # or your branch
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.0' # or your Flutter version
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.13.0' # Or your target version
+    - run: flutter pub get
+    - run: flutter build windows
 
-      - name: Enable Windows
-        run: flutter config --enable-windows-desktop
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build Windows EXE
-        run: flutter build windows
-
-      - name: Upload EXE as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: my_flutter_app_windows
-          path: build/windows/runner/Release/
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-exe
+        path: build/windows/runner/Release/

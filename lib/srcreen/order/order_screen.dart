@@ -38,39 +38,38 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   //add Item
   Future<void> _addSimpleItem() async {
-  final result = await Navigator.push<Map<String, dynamic>>(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const AddOrderItemProductScreen(),
-    ),
-  );
-
-  if (result != null) {
-    final name = result['name'] as String;
-    final price = result['price'] as double;
-
-    final item = OrderItem(
-      product: Product(id: const Uuid().v4()
-      , categoryId: selectedCategoryId!
-      , name: name
-      , basePrice: price
-      ),
-      subProductName: '',
-      quantity: 1,
-      unitPrice: price,
-      extras: null,
-      toppings: null,
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddOrderItemProductScreen()),
     );
-    ref.read(orderProvider.notifier).addItem(item);
 
-    setState(() {
-      selectedProduct = null;
-      selectedSubProduct = null;
-      selectedExtras = [];
-      selectedToppings = [];
-    });
+    if (result != null) {
+      final name = result['name'] as String;
+      final price = result['price'] as double;
+
+      final item = OrderItem(
+        product: Product(
+          id: const Uuid().v4(),
+          categoryId: selectedCategoryId!,
+          name: name,
+          basePrice: price,
+        ),
+        subProductName: '',
+        quantity: 1,
+        unitPrice: price,
+        extras: null,
+        toppings: null,
+      );
+      ref.read(orderProvider.notifier).addItem(item);
+
+      setState(() {
+        selectedProduct = null;
+        selectedSubProduct = null;
+        selectedExtras = [];
+        selectedToppings = [];
+      });
+    }
   }
-}
 
   // Discount dialog
   Future<void> _openDiscountDialog() async {
@@ -310,6 +309,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 // RIGHT PANEL (Order summary)
                 Expanded(
                   child: OrderRightPanel(
+                    onquantityInc: (index) => ref
+                        .read(orderProvider.notifier)
+                        .increaseQuantity(index),
+                    onquantityDec: (index) => ref
+                        .read(orderProvider.notifier)
+                        .decreaseQuantity(index),
                     orderItems: orderItems,
                     onAddItem: _addSimpleItem,
                     selectedDiscount: selectedDiscount,
@@ -330,7 +335,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       final updated = item.copyWith(toppings: newToppings);
                       final updatedItems = [...orderItems];
                       updatedItems[itemIndex] = updated;
-                      ref.read(orderProvider.notifier).updateItems(updatedItems);
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
                     },
                     onRemoveExtra: (itemIndex, extraIndex) {
                       final item = orderItems[itemIndex];
@@ -338,7 +345,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       final updated = item.copyWith(extras: newExtras);
                       final updatedItems = [...orderItems];
                       updatedItems[itemIndex] = updated;
-                      ref.read(orderProvider.notifier).updateItems(updatedItems);
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
                     },
                   ),
                 ),
@@ -372,6 +381,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                   const Divider(thickness: 2),
                   Expanded(
                     child: OrderRightPanel(
+                      onquantityInc: (index) => ref
+                          .read(orderProvider.notifier)
+                          .increaseQuantity(index),
+                      onquantityDec: (index) => ref
+                          .read(orderProvider.notifier)
+                          .decreaseQuantity(index),
                       onAddItem: _addSimpleItem,
                       orderItems: orderItems,
                       selectedDiscount: selectedDiscount,
@@ -398,7 +413,8 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       },
                       onRemoveExtra: (itemIndex, extraIndex) {
                         final item = orderItems[itemIndex];
-                        final newExtras = [...item.extras!]..removeAt(extraIndex);
+                        final newExtras = [...item.extras!]
+                          ..removeAt(extraIndex);
                         final updated = item.copyWith(extras: newExtras);
                         final updatedItems = [...orderItems];
                         updatedItems[itemIndex] = updated;

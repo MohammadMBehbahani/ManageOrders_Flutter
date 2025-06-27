@@ -5,8 +5,9 @@ import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:uuid/uuid.dart';
 
-final orderProvider =
-    NotifierProvider<OrderNotifier, List<OrderItem>>(OrderNotifier.new);
+final orderProvider = NotifierProvider<OrderNotifier, List<OrderItem>>(
+  OrderNotifier.new,
+);
 
 class OrderNotifier extends Notifier<List<OrderItem>> {
   @override
@@ -21,6 +22,23 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
     state = newList;
   }
 
+  void increaseQuantity(int index) {
+    final newList = [...state];
+    final item = newList[index];
+    newList[index] = item.copyWith(quantity: item.quantity + 1);
+    state = newList;
+  }
+
+  void decreaseQuantity(int index) {
+    final newList = [...state];
+    final item = newList[index];
+    if  (item.quantity <= 1){
+      return;
+    }
+    newList[index] = item.copyWith(quantity: item.quantity - 1);
+    state = newList;
+  }
+
   void updateItems(List<OrderItem> items) {
     state = items;
   }
@@ -30,10 +48,7 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
   }
 
   /// Updated to accept payment method
-  Order getDraftOrder({
-    Discount? discount,
-    required String paymentMethod,
-  }) {
+  Order getDraftOrder({Discount? discount, required String paymentMethod}) {
     final total = _calculateTotal(state, discount);
     return Order(
       id: const Uuid().v4(),
@@ -62,10 +77,14 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
 
   double _calculateTotal(List<OrderItem> items, Discount? discount) {
     double subtotal = items.fold(0.0, (sum, item) {
-      final toppingTotal = (item.toppings ?? [])
-          .fold(0.0, (prev, t) => prev + t.price);
-      final extraTotal = (item.extras ?? [])
-          .fold(0.0, (prev, e) => prev + e.amount);
+      final toppingTotal = (item.toppings ?? []).fold(
+        0.0,
+        (prev, t) => prev + t.price,
+      );
+      final extraTotal = (item.extras ?? []).fold(
+        0.0,
+        (prev, e) => prev + e.amount,
+      );
       return sum + (item.unitPrice + toppingTotal + extraTotal) * item.quantity;
     });
 

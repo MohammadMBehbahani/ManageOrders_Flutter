@@ -4,6 +4,7 @@ import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/category_provider.dart';
+import 'package:manageorders/srcreen/product/add_update_product_screen.dart';
 import 'package:manageorders/srcreen/product/product_extra_screen.dart';
 import 'package:manageorders/srcreen/product/product_topping_screen.dart';
 import 'package:manageorders/srcreen/product/sub_product_screen.dart';
@@ -21,6 +22,33 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   String searchQuery = '';
   // To track product being edited (null means adding)
   Product? editingProduct;
+
+  void _openProductScreen([Product? product]) async{
+    setState(() {
+      editingProduct = product;
+    });
+
+    final savedProduct = await Navigator.of(context).push<Product>(
+      MaterialPageRoute(
+        builder: (context) => ProductFormScreen(
+          product: product,
+        ),
+      ),
+    );
+
+   if (savedProduct != null) {
+    final notifier = ref.read(productProvider.notifier);
+    if (product == null) {
+      // Add new
+      await notifier.addProduct(
+        savedProduct.copyWith(id: const Uuid().v4()),
+      );
+    } else {
+      // Update existing
+      await notifier.updateProduct(savedProduct);
+    }
+  }
+  }
 
   void _openProductModal([Product? product]) {
     setState(() {
@@ -169,7 +197,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                         ElevatedButton.icon(
                           icon: const Icon(Icons.add),
                           label: const Text('Add Product'),
-                          onPressed: () => _openProductModal(),
+                          onPressed: () => _openProductScreen(),
                         ),
                       ],
                     ),

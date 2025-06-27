@@ -24,7 +24,14 @@ class PrintOrderWidget extends ConsumerWidget {
     final output = File('receipt.pdf');
     await output.writeAsBytes(pdfBytes);
 
-    await Process.run('cmd', ['/c', 'start', '/min', '', 'receipt.pdf', '/p']);
+    final path = output.absolute.path.replaceAll(r'\', r'\\');
+
+     // PowerShell command to print PDF using default app
+  final psCommand = '''
+Start-Process -FilePath "$path" -Verb Print -WindowStyle Hidden
+''';
+
+  await Process.run('powershell', ['-Command', psCommand]);
   }
 
   Future<Uint8List> generatePdf(

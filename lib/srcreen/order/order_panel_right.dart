@@ -39,8 +39,6 @@ class OrderRightPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
-    final width = screenSize.width;
 
     return  Padding(
         padding: const EdgeInsets.all(8),
@@ -151,10 +149,9 @@ class OrderRightPanel extends StatelessWidget {
                 const Text('Print'),
               ],
             ),
-            if (width < 600)
-              Column(
-                children: [
-                  ElevatedButton.icon(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [ ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -181,8 +178,13 @@ class OrderRightPanel extends StatelessWidget {
                     onPressed: onAddItem//(){},
                     // _openDiscountDialog,
                   ),
-                  SizedBox(height: 10),
-                  ElevatedButton.icon(
+                 ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -207,64 +209,9 @@ class OrderRightPanel extends StatelessWidget {
                     label: const Text('Submit Card'),
                     onPressed: onSubmitCard,
                   ),
-                ],
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                    icon: const Icon(Icons.percent, size: 24),
-                    label: const Text('Add Discount'),
-                    onPressed: onAddDiscount,
-                    // _openDiscountDialog,
-                  ),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                    icon: const Icon(Icons.payment, size: 24),
-                    label: const Text('Submit Cash'),
-                    onPressed: onSubmitCash,
-                  ),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                    icon: const Icon(Icons.payment, size: 24),
-                    label: const Text('Submit Card'),
-                    onPressed: onSubmitCard,
-                  ),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                    icon: const Icon(Icons.add_circle, size: 24),
-                    label: const Text('Add item'),
-                    onPressed: onAddItem,
-                    // _openDiscountDialog,
-                  )
-                ],
-              ),
+                ]
+            ),
+            
           ],
         ),
       );

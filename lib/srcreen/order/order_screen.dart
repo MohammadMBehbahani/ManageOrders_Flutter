@@ -282,7 +282,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       appBar: AppBar(title: const Text('Create Order')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 1200;
+          final isWide = constraints.maxWidth >= 1000;
           if (isWide) {
             return Row(
               children: [

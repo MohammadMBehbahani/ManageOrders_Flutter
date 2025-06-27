@@ -89,82 +89,84 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     final toppingPriceController = TextEditingController();
     bool addedTopping = false;
 
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text('Select or Add Topping'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String?>(
-                isExpanded: true,
-                hint: const Text('Select Existing Topping'),
-                value: selectedToppingId,
-                items: availableToppings
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e.toppingId,
-                        child: Text(e.name),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => selectedToppingId = val),
-              ),
-              const Divider(),
-              TextField(
-                enabled: selectedToppingId == null,
-                readOnly: selectedToppingId != null,
-                controller: toppingNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Or Enter New Topping',
+    if (mounted) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setState) => AlertDialog(
+            title: const Text('Select or Add Topping'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<String?>(
+                  isExpanded: true,
+                  hint: const Text('Select Existing Topping'),
+                  value: selectedToppingId,
+                  items: availableToppings
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.toppingId,
+                          child: Text(e.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedToppingId = val),
                 ),
-              ),
-              TextField(
-                controller: toppingPriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Price'),
+                const Divider(),
+                TextField(
+                  enabled: selectedToppingId == null,
+                  readOnly: selectedToppingId != null,
+                  controller: toppingNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Or Enter New Topping',
+                  ),
+                ),
+                TextField(
+                  controller: toppingPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Price'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Add'),
+                onPressed: () {
+                  final name = toppingNameController.text.trim();
+                  final price =
+                      double.tryParse(toppingPriceController.text) ?? 0.0;
+
+                  if (selectedToppingId != null) {
+                    final existing = availableToppings.firstWhere(
+                      (t) => t.toppingId == selectedToppingId,
+                    );
+                    setState(() {
+                      selectedToppings.add(
+                        OrderTopping(
+                          toppingId: existing.toppingId,
+                          name: existing.name,
+                          price: price,
+                        ),
+                      );
+                    });
+                    addedTopping = true;
+                  } else if (name.isNotEmpty) {
+                    final id = DateTime.now().millisecondsSinceEpoch.toString();
+                    setState(() {
+                      selectedToppings.add(
+                        OrderTopping(toppingId: id, name: name, price: price),
+                      );
+                    });
+                    addedTopping = true;
+                  }
+                  Navigator.pop(ctx);
+                },
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                final name = toppingNameController.text.trim();
-                final price =
-                    double.tryParse(toppingPriceController.text) ?? 0.0;
-
-                if (selectedToppingId != null) {
-                  final existing = availableToppings.firstWhere(
-                    (t) => t.toppingId == selectedToppingId,
-                  );
-                  setState(() {
-                    selectedToppings.add(
-                      OrderTopping(
-                        toppingId: existing.toppingId,
-                        name: existing.name,
-                        price: price,
-                      ),
-                    );
-                  });
-                  addedTopping = true;
-                } else if (name.isNotEmpty) {
-                  final id = DateTime.now().millisecondsSinceEpoch.toString();
-                  setState(() {
-                    selectedToppings.add(
-                      OrderTopping(toppingId: id, name: name, price: price),
-                    );
-                  });
-                  addedTopping = true;
-                }
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
         ),
-      ),
-    );
+      );
+    }
 
     if (addedTopping) {
       setState(() {}); // rebuild outer widget to show updated list
@@ -180,81 +182,87 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     final extraPriceController = TextEditingController();
     bool addedExtra = false;
 
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text('Select or Add Extra'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String?>(
-                isExpanded: true,
-                hint: const Text('Select Existing Extra'),
-                value: selectedExtraId,
-                items: availableExtras
-                    .map(
-                      (e) =>
-                          DropdownMenuItem(value: e.id, child: Text(e.title)),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => selectedExtraId = val),
-              ),
-              const Divider(),
-              TextField(
-                enabled: selectedExtraId == null,
-                readOnly: selectedExtraId != null,
-                controller: extraNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Or Enter New Extra',
+    if (mounted) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setState) => AlertDialog(
+            title: const Text('Select or Add Extra'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<String?>(
+                  isExpanded: true,
+                  hint: const Text('Select Existing Extra'),
+                  value: selectedExtraId,
+                  items: availableExtras
+                      .map(
+                        (e) =>
+                            DropdownMenuItem(value: e.id, child: Text(e.title)),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedExtraId = val),
                 ),
-              ),
-              TextField(
-                controller: extraPriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Price'),
+                const Divider(),
+                TextField(
+                  enabled: selectedExtraId == null,
+                  readOnly: selectedExtraId != null,
+                  controller: extraNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Or Enter New Extra',
+                  ),
+                ),
+                TextField(
+                  controller: extraPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Price'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Add'),
+                onPressed: () {
+                  final name = extraNameController.text.trim();
+                  final price =
+                      double.tryParse(extraPriceController.text) ?? 0.0;
+
+                  if (selectedExtraId != null) {
+                    final existing = availableExtras.firstWhere(
+                      (e) => e.id == selectedExtraId,
+                    );
+                    setState(() {
+                      selectedExtras.add(
+                        OrderExtra(title: existing.title, amount: price),
+                      );
+                    });
+                    addedExtra = true;
+                  } else if (name.isNotEmpty) {
+                    setState(() {
+                      selectedExtras.add(
+                        OrderExtra(title: name, amount: price),
+                      );
+                    });
+                    addedExtra = true;
+                  }
+                  Navigator.pop(ctx);
+                },
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                final name = extraNameController.text.trim();
-                final price = double.tryParse(extraPriceController.text) ?? 0.0;
-
-                if (selectedExtraId != null) {
-                  final existing = availableExtras.firstWhere(
-                    (e) => e.id == selectedExtraId,
-                  );
-                  setState(() {
-                    selectedExtras.add(
-                      OrderExtra(title: existing.title, amount: price),
-                    );
-                  });
-                  addedExtra = true;
-                } else if (name.isNotEmpty) {
-                  setState(() {
-                    selectedExtras.add(OrderExtra(title: name, amount: price));
-                  });
-                  addedExtra = true;
-                }
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
         ),
-      ),
-    );
+      );
+    }
 
     if (addedExtra) {
       setState(() {}); // rebuild to show updated list
     }
   }
 
-  void _addCurrentItemToOrder() {
+  void _addCurrentItemToOrder() async{
     final String subProductName;
     final double unitPrice;
+    
     if (selectedProduct == null && selectedSubProduct == null) {
       return;
     } else if (selectedProduct != null &&
@@ -271,9 +279,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       unitPrice =
           selectedProduct!.basePrice + selectedSubProduct!.additionalPrice;
     }
-
+    
+    final products = await ref.watch(productProvider.future);
+    final product = products.firstWhere((p) => p.id == selectedProduct!.id);
+    
     final item = OrderItem(
-      productId: selectedProduct!.id,
+      product: product,
       subProductName: subProductName,
       quantity: 1,
       unitPrice: unitPrice,
@@ -331,10 +342,13 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       selectedExtras = [];
       selectedToppings = [];
     });
+
+    _addCurrentItemToOrder();
   }
 
   void onSubProductSelect(SubProductOption subProduct) {
     setState(() => selectedSubProduct = subProduct);
+    _addCurrentItemToOrder();
   }
 
   void onRemoveExtra(int index) {
@@ -358,6 +372,15 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoryProvider).valueOrNull ?? [];
+
+    if (selectedCategoryId == null && categories.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          selectedCategoryId = categories.first.id;
+        });
+      });
+    }
+
     final products = ref.watch(productProvider).valueOrNull ?? [];
     final orderItems = ref.watch(orderProvider);
     final List<Product> filteredProducts = selectedCategoryId == null
@@ -421,6 +444,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 OrderRightPanel(
                   orderItems: orderItems,
                   products: products,
+                  onAddItem: () => {},
                   selectedDiscount: selectedDiscount,
                   finalTotal: finalTotal,
                   isPrintChecked: isPrintChecked,
@@ -477,6 +501,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
                   const Divider(thickness: 2),
                   OrderRightPanel(
+                    onAddItem: () => {},
                     orderItems: orderItems,
                     products: products,
                     selectedDiscount: selectedDiscount,

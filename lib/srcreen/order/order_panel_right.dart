@@ -16,6 +16,8 @@ class OrderRightPanel extends StatelessWidget {
   final VoidCallback onRemoveDiscount;
   final VoidCallback onSubmitCash;
   final VoidCallback onSubmitCard;
+  final VoidCallback onAddItem;
+  
   final void Function(int itemIndex) onRemoveItem;
   final void Function(int itemIndex, int toppingIndex) onRemoveTopping;
   final void Function(int itemIndex, int extraIndex) onRemoveExtra;
@@ -32,6 +34,7 @@ class OrderRightPanel extends StatelessWidget {
     required this.onRemoveDiscount,
     required this.onSubmitCash,
     required this.onSubmitCard,
+    required this.onAddItem,
     required this.onRemoveItem,
     required this.onRemoveTopping,
     required this.onRemoveExtra,
@@ -62,7 +65,7 @@ class OrderRightPanel extends StatelessWidget {
                     return Card(
                       child: ExpansionTile(
                         title: Text(
-                          '${products.firstWhere((p) => p.id == item.productId).name} - ${item.subProductName} x${item.quantity}',
+                          '${products.firstWhere((p) => p.id == item.product.id).name} - ${item.subProductName} x${item.quantity}',
                         ),
                         subtitle: Text(
                           '£${item.totalPrice.toStringAsFixed(2)}',
@@ -168,6 +171,19 @@ class OrderRightPanel extends StatelessWidget {
                     onPressed: onAddDiscount,
                     // _openDiscountDialog,
                   ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
+                    icon: const Icon(Icons.add_circle, size: 24),
+                    label: const Text('Add item'),
+                    onPressed: onAddItem//(){},
+                    // _openDiscountDialog,
+                  ),
                   SizedBox(height: 10),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
@@ -237,6 +253,19 @@ class OrderRightPanel extends StatelessWidget {
                     label: const Text('Submit Card'),
                     onPressed: onSubmitCard,
                   ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
+                    icon: const Icon(Icons.add_circle, size: 24),
+                    label: const Text('Add item'),
+                    onPressed: onAddItem,
+                    // _openDiscountDialog,
+                  )
                 ],
               ),
           ],

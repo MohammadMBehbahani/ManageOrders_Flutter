@@ -44,7 +44,7 @@ class PrintOrderWidget extends ConsumerWidget {
     // Group items by productId
     final Map<String, List<OrderItem>> grouped = {};
     for (final item in order.items) {
-      grouped.putIfAbsent(item.productId, () => []).add(item);
+      grouped.putIfAbsent(item.product.id, () => []).add(item);
     }
 
     double subtotal = order.items.fold(0, (sum, i) => sum + i.totalPrice);

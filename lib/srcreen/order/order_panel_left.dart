@@ -217,14 +217,7 @@ class OrderLeftPanel extends StatelessWidget {
                             label: const Text('+ Add Topping'),
                             onPressed: onAddTopping,
                           ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: onAddToOrder,
-                            child: const Text(
-                              'Add Order',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
+                          
                         ],
                       ),
 
@@ -404,14 +397,7 @@ class OrderLeftPanel extends StatelessWidget {
                       label: const Text('+ Add Topping'),
                       onPressed: onAddTopping,
                     ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: onAddToOrder,
-                      child: const Text(
-                        'Add to Order',
-                        style: TextStyle(fontSize: 25),
-                      ),
-                    ),
+                    
                   ],
                 ),
             ],

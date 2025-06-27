@@ -1,9 +1,10 @@
 import 'package:manageorders/models/order_extra.dart';
+import 'package:manageorders/models/product.dart';
 
 import 'order_topping.dart';
 
 class OrderItem {
-  final String productId;
+  final Product product;
   final String subProductName;
   final List<OrderExtra>? extras;
   final List<OrderTopping>? toppings; 
@@ -12,7 +13,7 @@ class OrderItem {
   final double totalPrice;
 
   OrderItem({
-    required this.productId,
+    required this.product,
     required this.subProductName,
     this.extras,
     this.toppings,
@@ -21,7 +22,7 @@ class OrderItem {
   }): totalPrice = unitPrice * quantity;
 
    OrderItem copyWith({
-    String? productId,
+    Product? product,
     String? subProductName,
     List<OrderExtra>? extras,
     List<OrderTopping>? toppings,
@@ -29,7 +30,7 @@ class OrderItem {
     double? unitPrice,
   }) {
     return OrderItem(
-      productId: productId ?? this.productId,
+      product: product ?? this.product,
       subProductName: subProductName ?? this.subProductName,
       extras: extras ?? this.extras,
       toppings: toppings ?? this.toppings,
@@ -40,7 +41,7 @@ class OrderItem {
 
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
-      productId: map['productId'],
+      product: Product.fromMap(map['product']),
       subProductName: map['subProductName'],
       extras: (map['extras'] as List<dynamic>?)
               ?.map((e) => OrderExtra.fromMap(e))
@@ -55,7 +56,7 @@ class OrderItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'productId': productId,
+      'product': product.toMap(),
       'subProductName': subProductName,
       'extras': extras?.map((e) => e.toMap()).toList(),
       'toppings': toppings?.map((e) => e.toMap()).toList(),

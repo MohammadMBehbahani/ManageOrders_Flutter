@@ -13,7 +13,12 @@ import 'package:manageorders/providers/order_provider.dart';
 import 'package:manageorders/providers/topping_provider.dart';
 import 'package:manageorders/srcreen/order/order_panel_left.dart';
 import 'package:manageorders/srcreen/order/order_panel_right.dart';
+import 'package:manageorders/srcreen/order/orderwidget/add_item_screen.dart';
+import 'package:manageorders/srcreen/order/orderwidget/discount_select_screen.dart';
+import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart';
+import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
 import 'package:manageorders/widgets/print_order.dart';
+import 'package:uuid/uuid.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
   const OrderScreen({super.key});
@@ -30,146 +35,73 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   List<OrderTopping> selectedToppings = [];
   Discount? selectedDiscount;
   bool isPrintChecked = false;
-  // Discount dialog
-  void _openDiscountDialog() async {
-    String discountType = 'percentage';
-    double value = 0.0;
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text('Add Discount'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String>(
-                value: discountType,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'percentage',
-                    child: Text('Percentage'),
-                  ),
-                  DropdownMenuItem(value: 'flat', child: Text('Flat Amount')),
-                ],
-                onChanged: (v) => setState(() => discountType = v!),
-              ),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Value'),
-                onChanged: (val) => value = double.tryParse(val) ?? 0.0,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Apply'),
-              onPressed: () {
-                setState(() {
-                  selectedDiscount = Discount(type: discountType, value: value);
-                });
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
-        ),
+
+  //add Item
+  Future<void> _addSimpleItem() async {
+  final result = await Navigator.push<Map<String, dynamic>>(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const AddOrderItemProductScreen(),
+    ),
+  );
+
+  if (result != null) {
+    final name = result['name'] as String;
+    final price = result['price'] as double;
+
+    final item = OrderItem(
+      product: Product(id: const Uuid().v4()
+      , categoryId: selectedCategoryId!
+      , name: name
+      , basePrice: price
       ),
+      subProductName: '',
+      quantity: 1,
+      unitPrice: price,
+      extras: null,
+      toppings: null,
     );
-    setState(() {});
+    ref.read(orderProvider.notifier).addItem(item);
+
+    setState(() {
+      selectedProduct = null;
+      selectedSubProduct = null;
+      selectedExtras = [];
+      selectedToppings = [];
+    });
+  }
+}
+
+  // Discount dialog
+  Future<void> _openDiscountDialog() async {
+    final discount = await Navigator.push<Discount>(
+      context,
+      MaterialPageRoute(builder: (_) => const DiscountSelectScreen()),
+    );
+
+    if (discount != null) {
+      setState(() {
+        selectedDiscount = discount;
+      });
+    }
   }
 
   // Add Topping dialog
   Future<void> _openToppingDialog() async {
     final toppingList = await ref.watch(toppingProvider.future);
-    final availableToppings = toppingList
-        .map((t) => OrderTopping(toppingId: t.id, name: t.name, price: 0))
-        .toList();
-
-    String? selectedToppingId;
-    final toppingNameController = TextEditingController();
-    final toppingPriceController = TextEditingController();
-    bool addedTopping = false;
-
     if (mounted) {
-      await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setState) => AlertDialog(
-            title: const Text('Select or Add Topping'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButton<String?>(
-                  isExpanded: true,
-                  hint: const Text('Select Existing Topping'),
-                  value: selectedToppingId,
-                  items: availableToppings
-                      .map(
-                        (e) => DropdownMenuItem(
-                          value: e.toppingId,
-                          child: Text(e.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (val) => setState(() => selectedToppingId = val),
-                ),
-                const Divider(),
-                TextField(
-                  enabled: selectedToppingId == null,
-                  readOnly: selectedToppingId != null,
-                  controller: toppingNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Or Enter New Topping',
-                  ),
-                ),
-                TextField(
-                  controller: toppingPriceController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Add'),
-                onPressed: () {
-                  final name = toppingNameController.text.trim();
-                  final price =
-                      double.tryParse(toppingPriceController.text) ?? 0.0;
-
-                  if (selectedToppingId != null) {
-                    final existing = availableToppings.firstWhere(
-                      (t) => t.toppingId == selectedToppingId,
-                    );
-                    setState(() {
-                      selectedToppings.add(
-                        OrderTopping(
-                          toppingId: existing.toppingId,
-                          name: existing.name,
-                          price: price,
-                        ),
-                      );
-                    });
-                    addedTopping = true;
-                  } else if (name.isNotEmpty) {
-                    final id = DateTime.now().millisecondsSinceEpoch.toString();
-                    setState(() {
-                      selectedToppings.add(
-                        OrderTopping(toppingId: id, name: name, price: price),
-                      );
-                    });
-                    addedTopping = true;
-                  }
-                  Navigator.pop(ctx);
-                },
-              ),
-            ],
-          ),
+      final topping = await Navigator.push<OrderTopping>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ToppingSelectScreen(availableToppings: toppingList),
         ),
       );
-    }
 
-    if (addedTopping) {
-      setState(() {}); // rebuild outer widget to show updated list
+      if (topping != null) {
+        setState(() {
+          selectedToppings.add(topping);
+        });
+      }
     }
   }
 
@@ -177,92 +109,25 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   Future<void> _openExtraDialog() async {
     final availableExtras = await ref.watch(extraProvider.future);
 
-    String? selectedExtraId;
-    final extraNameController = TextEditingController();
-    final extraPriceController = TextEditingController();
-    bool addedExtra = false;
-
     if (mounted) {
-      await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setState) => AlertDialog(
-            title: const Text('Select or Add Extra'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButton<String?>(
-                  isExpanded: true,
-                  hint: const Text('Select Existing Extra'),
-                  value: selectedExtraId,
-                  items: availableExtras
-                      .map(
-                        (e) =>
-                            DropdownMenuItem(value: e.id, child: Text(e.title)),
-                      )
-                      .toList(),
-                  onChanged: (val) => setState(() => selectedExtraId = val),
-                ),
-                const Divider(),
-                TextField(
-                  enabled: selectedExtraId == null,
-                  readOnly: selectedExtraId != null,
-                  controller: extraNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Or Enter New Extra',
-                  ),
-                ),
-                TextField(
-                  controller: extraPriceController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Add'),
-                onPressed: () {
-                  final name = extraNameController.text.trim();
-                  final price =
-                      double.tryParse(extraPriceController.text) ?? 0.0;
-
-                  if (selectedExtraId != null) {
-                    final existing = availableExtras.firstWhere(
-                      (e) => e.id == selectedExtraId,
-                    );
-                    setState(() {
-                      selectedExtras.add(
-                        OrderExtra(title: existing.title, amount: price),
-                      );
-                    });
-                    addedExtra = true;
-                  } else if (name.isNotEmpty) {
-                    setState(() {
-                      selectedExtras.add(
-                        OrderExtra(title: name, amount: price),
-                      );
-                    });
-                    addedExtra = true;
-                  }
-                  Navigator.pop(ctx);
-                },
-              ),
-            ],
-          ),
+      final addedExtra = await Navigator.push<OrderExtra>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ExtraSelectScreen(availableExtras: availableExtras),
         ),
       );
-    }
-
-    if (addedExtra) {
-      setState(() {}); // rebuild to show updated list
+      if (addedExtra != null) {
+        setState(() {
+          selectedExtras.add(addedExtra);
+        });
+      }
     }
   }
 
-  void _addCurrentItemToOrder() async{
+  void _addCurrentItemToOrder() async {
     final String subProductName;
     final double unitPrice;
-    
+
     if (selectedProduct == null && selectedSubProduct == null) {
       return;
     } else if (selectedProduct != null &&
@@ -279,10 +144,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       unitPrice =
           selectedProduct!.basePrice + selectedSubProduct!.additionalPrice;
     }
-    
+
     final products = await ref.watch(productProvider.future);
     final product = products.firstWhere((p) => p.id == selectedProduct!.id);
-    
+
     final item = OrderItem(
       product: product,
       subProductName: subProductName,
@@ -422,66 +287,8 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
             return Row(
               children: [
                 // LEFT PANEL
-                OrderLeftPanel(
-                  onAddToOrder: _addCurrentItemToOrder,
-                  onAddExtra: _openExtraDialog,
-                  onAddTopping: _openToppingDialog,
-                  categories: categories,
-                  filteredProducts: filteredProducts,
-                  selectedCategoryId: selectedCategoryId,
-                  selectedProduct: selectedProduct,
-                  selectedSubProduct: selectedSubProduct,
-                  selectedExtras: selectedExtras,
-                  selectedToppings: selectedToppings,
-                  onCategorySelect: onCategorySelect,
-                  onProductSelect: onProductSelect,
-                  onSubProductSelect: onSubProductSelect,
-                  onRemoveExtra: onRemoveExtra,
-                  onRemoveTopping: onRemoveTopping,
-                ),
-
-                // RIGHT PANEL (Order summary)
-                OrderRightPanel(
-                  orderItems: orderItems,
-                  products: products,
-                  onAddItem: () => {},
-                  selectedDiscount: selectedDiscount,
-                  finalTotal: finalTotal,
-                  isPrintChecked: isPrintChecked,
-                  onPrintToggle: (value) =>
-                      setState(() => isPrintChecked = value ?? false),
-                  onAddDiscount: _openDiscountDialog,
-                  onRemoveDiscount: onRemoveDiscount,
-                  onSubmitCash: () async => await _submitOrder('cash'),
-                  onSubmitCard: () async => _submitOrder('card'),
-                  onRemoveItem: (index) =>
-                      ref.read(orderProvider.notifier).removeItem(index),
-                  onRemoveTopping: (itemIndex, toppingIndex) {
-                    final item = orderItems[itemIndex];
-                    final newToppings = [...item.toppings!]
-                      ..removeAt(toppingIndex);
-                    final updated = item.copyWith(toppings: newToppings);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
-                  onRemoveExtra: (itemIndex, extraIndex) {
-                    final item = orderItems[itemIndex];
-                    final newExtras = [...item.extras!]..removeAt(extraIndex);
-                    final updated = item.copyWith(extras: newExtras);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
-                ),
-              ],
-            );
-          } else {
-            return SizedBox(
-              height: constraints.maxHeight, // full screen height
-              child: Column(
-                children: [
-                  OrderLeftPanel(
+                Expanded(
+                  child: OrderLeftPanel(
                     onAddToOrder: _addCurrentItemToOrder,
                     onAddExtra: _openExtraDialog,
                     onAddTopping: _openToppingDialog,
@@ -498,12 +305,13 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     onRemoveExtra: onRemoveExtra,
                     onRemoveTopping: onRemoveTopping,
                   ),
+                ),
 
-                  const Divider(thickness: 2),
-                  OrderRightPanel(
-                    onAddItem: () => {},
+                // RIGHT PANEL (Order summary)
+                Expanded(
+                  child: OrderRightPanel(
                     orderItems: orderItems,
-                    products: products,
+                    onAddItem: _addSimpleItem,
                     selectedDiscount: selectedDiscount,
                     finalTotal: finalTotal,
                     isPrintChecked: isPrintChecked,
@@ -522,9 +330,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       final updated = item.copyWith(toppings: newToppings);
                       final updatedItems = [...orderItems];
                       updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
+                      ref.read(orderProvider.notifier).updateItems(updatedItems);
                     },
                     onRemoveExtra: (itemIndex, extraIndex) {
                       final item = orderItems[itemIndex];
@@ -532,10 +338,75 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       final updated = item.copyWith(extras: newExtras);
                       final updatedItems = [...orderItems];
                       updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
+                      ref.read(orderProvider.notifier).updateItems(updatedItems);
                     },
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return SizedBox(
+              height: constraints.maxHeight, // full screen height
+              child: Column(
+                children: [
+                  Expanded(
+                    child: OrderLeftPanel(
+                      onAddToOrder: _addCurrentItemToOrder,
+                      onAddExtra: _openExtraDialog,
+                      onAddTopping: _openToppingDialog,
+                      categories: categories,
+                      filteredProducts: filteredProducts,
+                      selectedCategoryId: selectedCategoryId,
+                      selectedProduct: selectedProduct,
+                      selectedSubProduct: selectedSubProduct,
+                      selectedExtras: selectedExtras,
+                      selectedToppings: selectedToppings,
+                      onCategorySelect: onCategorySelect,
+                      onProductSelect: onProductSelect,
+                      onSubProductSelect: onSubProductSelect,
+                      onRemoveExtra: onRemoveExtra,
+                      onRemoveTopping: onRemoveTopping,
+                    ),
+                  ),
+
+                  const Divider(thickness: 2),
+                  Expanded(
+                    child: OrderRightPanel(
+                      onAddItem: () => {},
+                      orderItems: orderItems,
+                      selectedDiscount: selectedDiscount,
+                      finalTotal: finalTotal,
+                      isPrintChecked: isPrintChecked,
+                      onPrintToggle: (value) =>
+                          setState(() => isPrintChecked = value ?? false),
+                      onAddDiscount: _openDiscountDialog,
+                      onRemoveDiscount: onRemoveDiscount,
+                      onSubmitCash: () async => await _submitOrder('cash'),
+                      onSubmitCard: () async => _submitOrder('card'),
+                      onRemoveItem: (index) =>
+                          ref.read(orderProvider.notifier).removeItem(index),
+                      onRemoveTopping: (itemIndex, toppingIndex) {
+                        final item = orderItems[itemIndex];
+                        final newToppings = [...item.toppings!]
+                          ..removeAt(toppingIndex);
+                        final updated = item.copyWith(toppings: newToppings);
+                        final updatedItems = [...orderItems];
+                        updatedItems[itemIndex] = updated;
+                        ref
+                            .read(orderProvider.notifier)
+                            .updateItems(updatedItems);
+                      },
+                      onRemoveExtra: (itemIndex, extraIndex) {
+                        final item = orderItems[itemIndex];
+                        final newExtras = [...item.extras!]..removeAt(extraIndex);
+                        final updated = item.copyWith(extras: newExtras);
+                        final updatedItems = [...orderItems];
+                        updatedItems[itemIndex] = updated;
+                        ref
+                            .read(orderProvider.notifier)
+                            .updateItems(updatedItems);
+                      },
+                    ),
                   ),
                 ],
               ),

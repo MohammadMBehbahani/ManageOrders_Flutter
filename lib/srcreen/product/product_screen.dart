@@ -50,38 +50,6 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   }
   }
 
-  void _openProductModal([Product? product]) {
-    setState(() {
-      editingProduct = product;
-    });
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return ProductFormModal(
-          product: product,
-          onSave: (product) async {
-            final notifier = ref.read(productProvider.notifier);
-            if (product.id.isEmpty) {
-              // Add new
-              await notifier.addProduct(
-                product.copyWith(id: const Uuid().v4()),
-              );
-            } else {
-              // Update existing
-              await notifier.updateProduct(product);
-            }
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-            setState(() {
-              editingProduct = null;
-            });
-          },
-        );
-      },
-    );
-  }
 
   void _confirmDelete(String productId) {
     showDialog(
@@ -231,7 +199,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                         IconButton(
                                           icon: const Icon(Icons.edit),
                                           tooltip: 'Edit product',
-                                          onPressed: () => _openProductModal(p),
+                                          onPressed: () => _openProductScreen(p),
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.delete),

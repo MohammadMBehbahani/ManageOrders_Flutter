@@ -3,11 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/models/discount.dart';
-import 'package:manageorders/models/product.dart';
 
 class OrderRightPanel extends StatelessWidget {
   final List<OrderItem> orderItems;
-  final List<Product> products;
   final Discount? selectedDiscount;
   final double finalTotal;
   final bool isPrintChecked;
@@ -25,7 +23,6 @@ class OrderRightPanel extends StatelessWidget {
   const OrderRightPanel({
     super.key,
     required this.orderItems,
-    required this.products,
     required this.selectedDiscount,
     required this.finalTotal,
     required this.isPrintChecked,
@@ -45,8 +42,7 @@ class OrderRightPanel extends StatelessWidget {
     Size screenSize = MediaQuery.of(context).size;
     final width = screenSize.width;
 
-    return Expanded(
-      child: Padding(
+    return  Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
@@ -65,7 +61,7 @@ class OrderRightPanel extends StatelessWidget {
                     return Card(
                       child: ExpansionTile(
                         title: Text(
-                          '${products.firstWhere((p) => p.id == item.product.id).name} - ${item.subProductName} x${item.quantity}',
+                          '${item.product.name} - ${item.subProductName} x${item.quantity}',
                         ),
                         subtitle: Text(
                           '£${item.totalPrice.toStringAsFixed(2)}',
@@ -155,7 +151,7 @@ class OrderRightPanel extends StatelessWidget {
                 const Text('Print'),
               ],
             ),
-            if (width < 600)
+            if (width < 800)
               Column(
                 children: [
                   ElevatedButton.icon(
@@ -171,6 +167,7 @@ class OrderRightPanel extends StatelessWidget {
                     onPressed: onAddDiscount,
                     // _openDiscountDialog,
                   ),
+                  SizedBox(height: 10),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -270,7 +267,6 @@ class OrderRightPanel extends StatelessWidget {
               ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

@@ -48,8 +48,7 @@ class OrderLeftPanel extends StatelessWidget {
     Size screenSize = MediaQuery.of(context).size;
     final width = screenSize.width;
 
-    return Expanded(
-      child: Padding(
+    return  Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,6 +306,7 @@ class OrderLeftPanel extends StatelessWidget {
                 )
               else
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (selectedExtras.isNotEmpty) ...[
                       const Padding(
@@ -403,7 +403,6 @@ class OrderLeftPanel extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 }

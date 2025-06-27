@@ -151,7 +151,7 @@ class OrderRightPanel extends StatelessWidget {
                 const Text('Print'),
               ],
             ),
-            if (width < 800)
+            if (width < 600)
               Column(
                 children: [
                   ElevatedButton.icon(

@@ -372,7 +372,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                   const Divider(thickness: 2),
                   Expanded(
                     child: OrderRightPanel(
-                      onAddItem: () => {},
+                      onAddItem: _addSimpleItem,
                       orderItems: orderItems,
                       selectedDiscount: selectedDiscount,
                       finalTotal: finalTotal,

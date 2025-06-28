@@ -29,6 +29,14 @@ class OrderScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(orderProvider.notifier).clearOrder();
+    });
+  }
+
   String? selectedCategoryId;
   Product? selectedProduct;
   SubProductOption? selectedSubProduct;

@@ -17,24 +17,32 @@ jobs:
         with:
           flutter-version: '3.32.5'
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
       - name: Enable Windows support
         run: flutter config --enable-windows-desktop
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Build Windows EXE
+      - name: Build Flutter Windows EXE
         run: flutter build windows --release
 
-      - name: Debug Output Directory
-        run: dir build\windows\x64\runner\Release
+      - name: Build OpenDrawer.exe from C#
+        run: dotnet publish OpenDrawer/OpenDrawer.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o windows
+
+      - name: Copy OpenDrawer.exe to output
+        run: copy windows\OpenDrawer.exe build\windows\x64\runner\Release\OpenDrawer.exe
 
       - name: Confirm OpenDrawer.exe exists
-        run: dir windows\OpenDrawer.exe
+        run: dir build\windows\x64\runner\Release\OpenDrawer.exe
 
-      - name: List output EXEs
+      - name: List final output folder
         run: dir build\windows\x64\runner\Release
-    
+
       - name: Upload Windows EXE artifact
         uses: actions/upload-artifact@v4
         with:

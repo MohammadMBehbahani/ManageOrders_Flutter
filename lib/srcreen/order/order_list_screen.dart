@@ -98,7 +98,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
 
   Future<void> openCashDrawer(BuildContext context) async {
     try {
-      final result = await Process.run('windows\\OpenDrawer.exe', []);
+      final result = await Process.run('OpenDrawer.exe', []);
 
       if (result.exitCode == 0) {
         print('✅ Drawer opened: ${result.stdout}');

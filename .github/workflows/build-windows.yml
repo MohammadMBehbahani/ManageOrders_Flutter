@@ -29,9 +29,12 @@ jobs:
       - name: Debug Output Directory
         run: dir build\windows\x64\runner\Release
 
+      - name: Confirm OpenDrawer.exe exists
+        run: dir windows\OpenDrawer.exe
+
       - name: List output EXEs
         run: dir build\windows\x64\runner\Release
-
+    
       - name: Upload Windows EXE artifact
         uses: actions/upload-artifact@v4
         with:

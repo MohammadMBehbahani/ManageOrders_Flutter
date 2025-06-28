@@ -119,11 +119,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     decoration: const InputDecoration(labelText: 'Price'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Enter a price';
+                      }
                       final price = double.tryParse(value);
-                      if (price == null || price <= 0)
+                      if (price == null || price <= 0) {
                         return 'Enter valid price';
+                      }
                       return null;
                     },
                   ),

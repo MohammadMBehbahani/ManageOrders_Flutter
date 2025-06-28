@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/models/discount.dart';
+import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
 class OrderRightPanel extends StatelessWidget {
   final List<OrderItem> orderItems;
@@ -48,10 +47,8 @@ class OrderRightPanel extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
-              ),
+            child: ScrollWithTouch(
+              
               child: ListView.builder(
                 itemCount: orderItems.length,
                 itemBuilder: (_, i) {

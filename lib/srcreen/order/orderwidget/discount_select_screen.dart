@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/discount.dart';
+import 'package:manageorders/widgets/number_pad.dart';
 
 class DiscountSelectScreen extends StatefulWidget {
   const DiscountSelectScreen({super.key});
@@ -35,7 +36,10 @@ class _DiscountSelectScreenState extends State<DiscountSelectScreen> {
             DropdownButton<String>(
               value: discountType,
               items: const [
-                DropdownMenuItem(value: 'percentage', child: Text('Percentage')),
+                DropdownMenuItem(
+                  value: 'percentage',
+                  child: Text('Percentage'),
+                ),
                 DropdownMenuItem(value: 'flat', child: Text('Flat Amount')),
               ],
               onChanged: (v) => setState(() => discountType = v!),
@@ -50,6 +54,31 @@ class _DiscountSelectScreenState extends State<DiscountSelectScreen> {
             ElevatedButton(
               onPressed: _applyDiscount,
               child: const Text('Apply'),
+            ),
+            const SizedBox(height: 16),
+            NumberPad(
+              onKeyTap: (value) {
+                setState(() {
+                  if (value == 'C') {
+                    valueController.clear();
+                    this.value = 0.0;
+                  } else if (value == '⌫') {
+                    final current = valueController.text;
+                    if (current.isNotEmpty) {
+                      valueController.text = current.substring(
+                        0,
+                        current.length - 1,
+                      );
+                      this.value = double.tryParse(valueController.text) ?? 0.0;
+                    }
+                  } else {
+                    final current = valueController.text;
+                    if (value == '.' && current.contains('.')) return;
+                    valueController.text = current + value;
+                    this.value = double.tryParse(valueController.text) ?? 0.0;
+                  }
+                });
+              },
             ),
           ],
         ),

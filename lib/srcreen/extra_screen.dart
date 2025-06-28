@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/extra.dart';
 import 'package:manageorders/providers/extra_provider.dart';
+import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
 class ExtraScreen extends ConsumerStatefulWidget {
   const ExtraScreen({super.key});
@@ -112,29 +113,31 @@ class _ExtraScreenState extends ConsumerState<ExtraScreen> {
                     return const Center(child: Text('No categories found.'));
                   }
 
-                  return ListView.builder(
-                    itemCount: categories.length,
-                    itemBuilder: (_, i) {
-                      final cat = categories[i];
-                      return Card(
-                        child: ListTile(
-                          title: Text(cat.title),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => _editExtra(cat),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _deleteExtra(cat.id),
-                              ),
-                            ],
+                  return ScrollWithTouch(
+                    child: ListView.builder(
+                      itemCount: categories.length,
+                      itemBuilder: (_, i) {
+                        final cat = categories[i];
+                        return Card(
+                          child: ListTile(
+                            title: Text(cat.title),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _editExtra(cat),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _deleteExtra(cat.id),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),

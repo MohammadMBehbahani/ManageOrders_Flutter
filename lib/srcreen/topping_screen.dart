@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/topping.dart';
 import 'package:manageorders/providers/topping_provider.dart';
+import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
 class ToppingScreen extends ConsumerStatefulWidget {
   const ToppingScreen({super.key});
@@ -112,29 +113,31 @@ class _ToppingScreenState extends ConsumerState<ToppingScreen> {
                     return const Center(child: Text('No Topping found.'));
                   }
 
-                  return ListView.builder(
-                    itemCount: categories.length,
-                    itemBuilder: (_, i) {
-                      final cat = categories[i];
-                      return Card(
-                        child: ListTile(
-                          title: Text(cat.name),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => _edittopping(cat),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _deletetopping(cat.id),
-                              ),
-                            ],
+                  return ScrollWithTouch(
+                    child: ListView.builder(
+                      itemCount: categories.length,
+                      itemBuilder: (_, i) {
+                        final cat = categories[i];
+                        return Card(
+                          child: ListTile(
+                            title: Text(cat.name),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _edittopping(cat),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _deletetopping(cat.id),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),

@@ -8,6 +8,7 @@ import 'package:manageorders/srcreen/product/add_update_product_screen.dart';
 import 'package:manageorders/srcreen/product/product_extra_screen.dart';
 import 'package:manageorders/srcreen/product/product_topping_screen.dart';
 import 'package:manageorders/srcreen/product/sub_product_screen.dart';
+import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductScreen extends ConsumerStatefulWidget {
@@ -175,101 +176,103 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                     Expanded(
                       child: filteredProducts.isEmpty
                           ? const Center(child: Text('No products found.'))
-                          : ListView.builder(
-                              itemCount: filteredProducts.length,
-                              itemBuilder: (context, index) {
-                                final p = filteredProducts[index];
-                                final categoryName = categories
-                                    .firstWhere(
-                                      (c) => c.id == p.categoryId,
-                                      orElse: () =>
-                                          Category(id: '', name: 'Unknown'),
-                                    )
-                                    .name;
-
-                                return Card(
-                                  child: ListTile(
-                                    title: Text(p.name),
-                                    subtitle: Text(
-                                      '£${p.basePrice.toStringAsFixed(2)} • $categoryName',
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          tooltip: 'Edit product',
-                                          onPressed: () => _openProductScreen(p),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          tooltip: 'Delete product',
-                                          color: Colors.red,
-                                          onPressed: () => _confirmDelete(p.id),
-                                        ),
-
-                                        // Add Extra
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.add_box_outlined,
+                          : ScrollWithTouch(
+                            child: ListView.builder(
+                                itemCount: filteredProducts.length,
+                                itemBuilder: (context, index) {
+                                  final p = filteredProducts[index];
+                                  final categoryName = categories
+                                      .firstWhere(
+                                        (c) => c.id == p.categoryId,
+                                        orElse: () =>
+                                            Category(id: '', name: 'Unknown'),
+                                      )
+                                      .name;
+                            
+                                  return Card(
+                                    child: ListTile(
+                                      title: Text(p.name),
+                                      subtitle: Text(
+                                        '£${p.basePrice.toStringAsFixed(2)} • $categoryName',
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            tooltip: 'Edit product',
+                                            onPressed: () => _openProductScreen(p),
                                           ),
-                                          tooltip: 'Add Extra',
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    AddProductExtrasScreen(
-                                                      product: p,
-                                                    ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-
-                                        // Add Topping
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.local_pizza_outlined,
+                                          IconButton(
+                                            icon: const Icon(Icons.delete),
+                                            tooltip: 'Delete product',
+                                            color: Colors.red,
+                                            onPressed: () => _confirmDelete(p.id),
                                           ),
-                                          tooltip: 'Add Topping',
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    AddProductToppingsScreen(
-                                                      product: p,
-                                                    ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-
-                                        // Add SubProductOption
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.layers_outlined,
-                                          ),
-                                          tooltip: 'Add SubProduct Option',
-                                          onPressed: () => {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    AddSubProductScreen(
-                                                      product: p,
-                                                    ),
-                                              ),
+                            
+                                          // Add Extra
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.add_box_outlined,
                                             ),
-                                          },
-                                        ),
-                                      ],
+                                            tooltip: 'Add Extra',
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      AddProductExtrasScreen(
+                                                        product: p,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                            
+                                          // Add Topping
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.local_pizza_outlined,
+                                            ),
+                                            tooltip: 'Add Topping',
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      AddProductToppingsScreen(
+                                                        product: p,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                            
+                                          // Add SubProductOption
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.layers_outlined,
+                                            ),
+                                            tooltip: 'Add SubProduct Option',
+                                            onPressed: () => {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      AddSubProductScreen(
+                                                        product: p,
+                                                      ),
+                                                ),
+                                              ),
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              ),
+                          ),
                     ),
                   ],
                 );

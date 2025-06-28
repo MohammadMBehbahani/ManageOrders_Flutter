@@ -14,6 +14,7 @@ import 'package:manageorders/providers/topping_provider.dart';
 import 'package:manageorders/srcreen/order/order_panel_left.dart';
 import 'package:manageorders/srcreen/order/order_panel_right.dart';
 import 'package:manageorders/srcreen/order/orderwidget/add_item_screen.dart';
+import 'package:manageorders/srcreen/order/orderwidget/cash_payment_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/discount_select_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
@@ -167,26 +168,61 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 
   Future<void> _submitOrder(String paymentMethod) async {
-    final order = await ref
-        .read(orderProvider.notifier)
-        .submitOrder(paymentMethod: paymentMethod, discount: selectedDiscount);
-    setState(() => selectedDiscount = null);
-    if (isPrintChecked) {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          content: SizedBox(
-            width: 500,
-            height: 600,
-            child: PrintOrderWidget(order: order),
+    if (paymentMethod == 'cash') {
+      final order = ref
+          .read(orderProvider.notifier)
+          .getDraftOrder(
+            discount: selectedDiscount,
+            paymentMethod: paymentMethod,
+          );
+      final total = order.finalTotal;
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => CashPaymentScreen(
+            totalAmount: total,
+            isPrintChecked: isPrintChecked,
+            onSubmit: () async {
+              final submittedOrder = await ref
+                  .read(orderProvider.notifier)
+                  .submitOrder(
+                    paymentMethod: paymentMethod,
+                    discount: selectedDiscount,
+                  );
+              setState(() {
+                selectedDiscount = null;
+                isPrintChecked = false;
+              });
+              return submittedOrder;
+            },
           ),
         ),
       );
+    } else {
+      final order = await ref
+          .read(orderProvider.notifier)
+          .submitOrder(
+            paymentMethod: paymentMethod,
+            discount: selectedDiscount,
+          );
+      if (isPrintChecked) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            content: SizedBox(
+              width: 500,
+              height: 600,
+              child: PrintOrderWidget(order: order),
+            ),
+          ),
+        );
+      }
+      setState(() {
+        selectedDiscount = null;
+        isPrintChecked = false;
+      });
     }
-    setState(() {
-      isPrintChecked = false;
-    });
   }
 
   void onCategorySelect(String categoryId) {

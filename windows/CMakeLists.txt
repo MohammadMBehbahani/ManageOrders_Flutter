@@ -106,8 +106,16 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
-# Copy custom EXE after build
-add_custom_command(TARGET Runner POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-        "${CMAKE_CURRENT_SOURCE_DIR}/OpenDrawer.exe"
-        "$<TARGET_FILE_DIR:Runner>/OpenDrawer.exe")
+# Post-build: Copy OpenDrawer.exe to the output directory
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/flutter/CopyOpenDrawer.stamp"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/OpenDrawer.exe"
+    "${CMAKE_CURRENT_BINARY_DIR}/runner/Release/OpenDrawer.exe"
+  COMMAND ${CMAKE_COMMAND} -E touch
+    "${CMAKE_CURRENT_BINARY_DIR}/flutter/CopyOpenDrawer.stamp"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/OpenDrawer.exe"
+)
+add_custom_target(CopyOpenDrawer ALL
+  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/flutter/CopyOpenDrawer.stamp"
+)

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:manageorders/models/category.dart';
 import 'package:manageorders/models/product.dart';
+import 'package:manageorders/providers/category_provider.dart';
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -11,34 +13,18 @@ import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:collection/collection.dart';
-import 'dart:io';
 
 class PrintOrderWidget extends ConsumerWidget {
   final Order order;
 
   const PrintOrderWidget({super.key, required this.order});
 
-  Future<void> printdirect(Order order, List<Product> products) async {
-    final pdfBytes = await generatePdf(order, products);
-
-    final output = File('receipt.pdf');
-    await output.writeAsBytes(pdfBytes);
-
-    final path = output.absolute.path.replaceAll(r'\', r'\\');
-
-     // PowerShell command to print PDF using default app
-  final psCommand = '''
-Start-Process -FilePath "$path" -Verb Print -WindowStyle Hidden
-''';
-
-  await Process.run('powershell', ['-Command', psCommand]);
-  }
 
   Future<Uint8List> generatePdf(
     Order order,
-    List<Product> products, [
-    PdfPageFormat? format,
-  ]) async {
+    List<Product> products,
+    List<Category> categories,
+     [PdfPageFormat? format]) async {
     final pageFormat = PdfPageFormat(
       227, // width in points (80 mm ≈ 3.15 inch * 72)
       400, // height in points (change based on receipt length, or set large for scroll)
@@ -91,8 +77,14 @@ Start-Process -FilePath "$path" -Verb Print -WindowStyle Hidden
                 final productName =
                     products.firstWhereOrNull((p) => p.id == entry.key)?.name ??
                     '';
+                    
+                final categoryName = 
+                  categories.firstWhereOrNull((p) => p.id == products
+                          .firstWhereOrNull((p) => p.id == entry.key)?.categoryId)?.name ??
+                    '';
 
                 return [
+                  pw.Text(categoryName),
                   pw.Text(productName),
                   ...items.map((item) {
                     return pw.Column(
@@ -195,15 +187,22 @@ Start-Process -FilePath "$path" -Verb Print -WindowStyle Hidden
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productProvider);
+    final categoryAsync = ref.watch(categoryProvider);
 
     return productsAsync.when(
       data: (products) {
-        return PdfPreview(
-          build: (format) => generatePdf(order, products, format),
-          canChangePageFormat: false,
-          allowPrinting: true,
-          allowSharing: false,
-          initialPageFormat: PdfPageFormat.roll80,
+       return categoryAsync.when(
+          data: (categories) {
+            return PdfPreview(
+              build: (format) => generatePdf(order, products, categories, format),
+              canChangePageFormat: false,
+              allowPrinting: true,
+              allowSharing: false,
+              initialPageFormat: PdfPageFormat.roll80,
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

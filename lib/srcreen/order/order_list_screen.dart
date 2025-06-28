@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
@@ -94,6 +96,36 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
     await ref.read(submittedOrdersProvider.notifier).clearAll();
   }
 
+  Future<void> openCashDrawer(BuildContext context) async {
+    try {
+      final result = await Process.run('windows\\OpenDrawer.exe', []);
+
+      if (result.exitCode == 0) {
+        print('✅ Drawer opened: ${result.stdout}');
+      } else {
+        _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
+      }
+    } catch (e) {
+      _showErrorDialog(context, 'Exception occurred:\n$e');
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Drawer Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ordersAsync = ref.watch(submittedOrdersProvider);
@@ -116,10 +148,15 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                       : null,
                   child: const Text('Print Selected'),
                 ),
-               const SizedBox(height: 50),
+                const SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: () async => _printAll(),
                   child: const Text('Print All'),
+                ),
+                const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () async => openCashDrawer(context),
+                  child: const Text('Open Drawer'),
                 ),
               ],
             ),
@@ -169,17 +206,20 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                 Expanded(
                   child: ordersAsync.when(
                     data: (orders) {
-                      final filtered = orders.where((order) {
-                        if (fromDate != null &&
-                            order.createdAt.isBefore(fromDate!)) {
-                          return false;
-                        }
-                        if (toDate != null &&
-                            order.createdAt.isAfter(toDate!)) {
-                          return false;
-                        }
-                        return true;
-                      }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                      final filtered =
+                          orders.where((order) {
+                            if (fromDate != null &&
+                                order.createdAt.isBefore(fromDate!)) {
+                              return false;
+                            }
+                            if (toDate != null &&
+                                order.createdAt.isAfter(toDate!)) {
+                              return false;
+                            }
+                            return true;
+                          }).toList()..sort(
+                            (a, b) => b.createdAt.compareTo(a.createdAt),
+                          );
 
                       return ListView.builder(
                         itemCount: filtered.length,

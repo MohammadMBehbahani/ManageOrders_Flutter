@@ -43,6 +43,7 @@ dependencies:
   pdf: ^3.11.3
   collection: ^1.19.1
   sqflite_common_ffi: ^2.3.6
+  process_run: ^1.2.4
 
 dev_dependencies:
   flutter_test:

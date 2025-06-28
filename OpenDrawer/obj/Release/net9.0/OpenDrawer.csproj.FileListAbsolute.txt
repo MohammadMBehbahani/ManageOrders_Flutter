@@ -1,0 +1,15 @@
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/bin/Release/net9.0/OpenDrawer
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/bin/Release/net9.0/OpenDrawer.deps.json
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/bin/Release/net9.0/OpenDrawer.runtimeconfig.json
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/bin/Release/net9.0/OpenDrawer.dll
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/bin/Release/net9.0/OpenDrawer.pdb
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.AssemblyInfoInputs.cache
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.AssemblyInfo.cs
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.csproj.CoreCompileInputs.cache
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.sourcelink.json
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.dll
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/refint/OpenDrawer.dll
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.pdb
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/OpenDrawer.genruntimeconfig.cache
+/Users/mamo/Mamo/Flutter_App/ManageOrders_Flutter/OpenDrawer/obj/Release/net9.0/ref/OpenDrawer.dll

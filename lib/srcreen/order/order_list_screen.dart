@@ -96,16 +96,18 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
     await ref.read(submittedOrdersProvider.notifier).clearAll();
   }
 
-  Future<void> openCashDrawer(BuildContext context) async {
+  Future<void> openCashDrawer() async {
     try {
       final result = await Process.run('OpenDrawer.exe', []);
 
       if (result.exitCode == 0) {
-        print('✅ Drawer opened: ${result.stdout}');
+       // print('✅ Drawer opened: ${result.stdout}');
       } else {
+        if (!mounted) return;
         _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
       }
     } catch (e) {
+      if (!mounted) return;
       _showErrorDialog(context, 'Exception occurred:\n$e');
     }
   }
@@ -155,7 +157,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(
-                  onPressed: () async => openCashDrawer(context),
+                  onPressed: () async => openCashDrawer(),
                   child: const Text('Open Drawer'),
                 ),
               ],

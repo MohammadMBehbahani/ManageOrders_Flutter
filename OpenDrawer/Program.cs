@@ -39,7 +39,7 @@ class Program
 
     static void Main()
     {
-        string printerName = "ZJ-80";
+        string printerName = @"ZJ-80";
         byte[] openDrawerCommand = new byte[] { 27, 112, 0, 25, 250 };
 
         Console.WriteLine($"🧾 Attempting to open cash drawer on printer '{printerName}'...");

@@ -3,6 +3,41 @@ using System.Runtime.InteropServices;
 
 class RawPrinterHelper
 {
+    public static bool SendBytesToPrinter(string printerName, byte[] data)
+    {
+        IntPtr hPrinter;
+        int written = 0;
+
+        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero))
+        {
+            int err = Marshal.GetLastWin32Error();
+            throw new Exception($"OpenPrinter failed with error code: {err}");
+        }
+
+        try
+        {
+            if (!StartDocPrinter(hPrinter, 1, IntPtr.Zero))
+                throw new Exception("StartDocPrinter failed.");
+
+            if (!StartPagePrinter(hPrinter))
+                throw new Exception("StartPagePrinter failed.");
+
+            if (!WritePrinter(hPrinter, data, data.Length, out written))
+                throw new Exception("WritePrinter failed.");
+
+            if (!EndPagePrinter(hPrinter))
+                throw new Exception("EndPagePrinter failed.");
+
+            if (!EndDocPrinter(hPrinter))
+                throw new Exception("EndDocPrinter failed.");
+        }
+        finally
+        {
+            ClosePrinter(hPrinter);
+        }
+
+        return true;
+    }
     [DllImport("winspool.Drv", EntryPoint = "OpenPrinterA", SetLastError = true)]
     public static extern bool OpenPrinter(string printerName, out IntPtr hPrinter, IntPtr pDefault);
 
@@ -24,33 +59,7 @@ class RawPrinterHelper
     [DllImport("winspool.Drv", EntryPoint = "WritePrinter")]
     public static extern bool WritePrinter(IntPtr hPrinter, byte[] data, int count, out int written);
 
-    public static bool SendBytesToPrinter(string printerName, byte[] data)
-    {
-        IntPtr hPrinter;
-        int written = 0;
-
-        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero))
-        {
-            int err = Marshal.GetLastWin32Error();
-            throw new Exception($"OpenPrinter failed with error code: {err}");
-        }
-
-        bool success =
-            StartDocPrinter(hPrinter, 1, IntPtr.Zero) &&
-            StartPagePrinter(hPrinter) &&
-            WritePrinter(hPrinter, data, data.Length, out written) &&
-            EndPagePrinter(hPrinter) &&
-            EndDocPrinter(hPrinter);
-
-        ClosePrinter(hPrinter);
-
-        if (!success)
-        {
-            throw new Exception("One of the printer operations failed (StartDoc, Write, or End).");
-        }
-
-        return true;
-    }
+    
 }
 
 class Program

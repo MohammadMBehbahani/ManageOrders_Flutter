@@ -40,7 +40,7 @@ class Program
     static void Main()
     {
         string printerName = @"ZJ-80";
-        byte[] openDrawerCommand = new byte[] { 27, 112, 0, 25, 250 };
+        byte[] openDrawerCommand = Encoding.ASCII.GetBytes("Test print from app\n\n\n");//new byte[] { 27, 112, 0, 25, 250 };
 
         Console.WriteLine($"🧾 Attempting to open cash drawer on printer '{printerName}'...");
 

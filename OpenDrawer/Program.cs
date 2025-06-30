@@ -38,10 +38,10 @@ class RawPrinterHelper {
 }
 
 class Program {
-    static void Main(string[] args) {
-        string printerName = "ZJ-80"; // change if needed
+    static void Main() {
+        string printerName = "XPRINTER";  // ✅ Use the exact name from Control Panel > Printers
         byte[] drawerCommand = new byte[] { 27, 112, 0, 25, 250 };
         bool result = RawPrinterHelper.SendBytesToPrinter(printerName, drawerCommand);
-        Console.WriteLine(result ? "Drawer opened" : "Failed to open drawer");
+        Console.WriteLine(result ? "✅ Drawer opened" : "❌ Failed to open drawer");
     }
 }

@@ -31,19 +31,25 @@ class RawPrinterHelper
 
         if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero))
         {
-            Console.WriteLine("❌ Failed to open printer.");
-            return false;
+            int err = Marshal.GetLastWin32Error();
+            throw new Exception($"OpenPrinter failed with error code: {err}");
         }
 
-        bool success = StartDocPrinter(hPrinter, 1, IntPtr.Zero)
-            && StartPagePrinter(hPrinter)
-            && WritePrinter(hPrinter, data, data.Length, out written)
-            && EndPagePrinter(hPrinter)
-            && EndDocPrinter(hPrinter);
+        bool success =
+            StartDocPrinter(hPrinter, 1, IntPtr.Zero) &&
+            StartPagePrinter(hPrinter) &&
+            WritePrinter(hPrinter, data, data.Length, out written) &&
+            EndPagePrinter(hPrinter) &&
+            EndDocPrinter(hPrinter);
 
         ClosePrinter(hPrinter);
 
-        return success;
+        if (!success)
+        {
+            throw new Exception("One of the printer operations failed (StartDoc, Write, or End).");
+        }
+
+        return true;
     }
 }
 
@@ -51,23 +57,31 @@ class Program
 {
     static void Main()
     {
-        // Change this to your actual printer name (check Get-Printer or Printer Settings)
-        string printerName = "ZJ-80"; // or "XPRINTER"
-        byte[] drawerCommand = new byte[] { 27, 112, 0, 25, 250 };
+        string printerName = "ZJ-80"; // Or use "XPRINTER" depending on your setup
+        byte[] drawerCommand = new byte[] { 27, 112, 0, 25, 250 }; // ESC p 0 25 250
 
-        Console.WriteLine($"📤 Sending drawer open command to '{printerName}'...");
-        bool result = RawPrinterHelper.SendBytesToPrinter(printerName, drawerCommand);
-
-        if (result)
+        try
         {
-            Console.WriteLine("✅ Drawer opened successfully.");
+            Console.WriteLine($"📤 Attempting to open cash drawer on printer '{printerName}'...");
+
+            bool result = RawPrinterHelper.SendBytesToPrinter(printerName, drawerCommand);
+
+            if (result)
+            {
+                Console.WriteLine("✅ Drawer command sent successfully.");
+            }
+            else
+            {
+                Console.WriteLine("❌ Failed to send drawer command.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("❌ Failed to open the drawer.");
+            Console.WriteLine("❌ Error occurred:");
+            Console.WriteLine(ex.Message);
         }
 
-        Console.WriteLine("Press Enter to exit...");
+        Console.WriteLine("\nPress Enter to exit...");
         Console.ReadLine();
     }
 }

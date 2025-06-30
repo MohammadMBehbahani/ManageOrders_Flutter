@@ -4,107 +4,94 @@ using System.Text;
 
 class Program
 {
-    // Native Win32 APIs
-    [DllImport("winspool.drv", SetLastError = true, CharSet = CharSet.Auto)]
-    public static extern bool OpenPrinter(string pPrinterName, out IntPtr phPrinter, IntPtr pDefault);
+    [DllImport("winspool.drv", SetLastError = true)]
+    static extern bool OpenPrinter(string pPrinterName, out IntPtr phPrinter, IntPtr pDefault);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool ClosePrinter(IntPtr hPrinter);
+    static extern bool ClosePrinter(IntPtr hPrinter);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, [In] ref DOC_INFO_1 di);
+    static extern bool StartDocPrinter(IntPtr hPrinter, int level, ref DOCINFO pDocInfo);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool EndDocPrinter(IntPtr hPrinter);
+    static extern bool EndDocPrinter(IntPtr hPrinter);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool StartPagePrinter(IntPtr hPrinter);
+    static extern bool StartPagePrinter(IntPtr hPrinter);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool EndPagePrinter(IntPtr hPrinter);
+    static extern bool EndPagePrinter(IntPtr hPrinter);
 
     [DllImport("winspool.drv", SetLastError = true)]
-    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
+    static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct DOC_INFO_1
+    public struct DOCINFO
     {
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string pDocName;
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string pOutputFile;
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string pDataType;
+        [MarshalAs(UnmanagedType.LPStr)] public string pDocName;
+        [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile;
+        [MarshalAs(UnmanagedType.LPStr)] public string pDataType;
     }
 
     static void Main()
     {
-        string printerName = @"ZJ-80";
-        byte[] openDrawerCommand = Encoding.ASCII.GetBytes("Test print from app\n\n\n");//new byte[] { 27, 112, 0, 25, 250 };
+        string printerName = "ZJ-80"; // Make sure it's exactly like shown in Get-Printer
+        Console.WriteLine($"🔍 Attempting to open cash drawer on printer: '{printerName}'...");
 
-        Console.WriteLine($"🧾 Attempting to open cash drawer on printer '{printerName}'...");
-
-        try
+        IntPtr hPrinter;
+        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero))
         {
-            IntPtr hPrinter;
-            if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero))
-            {
-                int err = Marshal.GetLastWin32Error();
-                Console.WriteLine($"❌ OpenPrinter failed with error code: {err}");
-                Console.ReadLine();
-                return;
-            }
+            int error = Marshal.GetLastWin32Error();
+            Console.WriteLine($"❌ OpenPrinter failed. Error: {error}");
+            Console.ReadLine();
+            return;
+        }
 
-            DOC_INFO_1 docInfo = new DOC_INFO_1
-            {
-                pDocName = "Open Cash Drawer",
-                pDataType = "RAW"
-            };
+        DOCINFO docInfo = new DOCINFO
+        {
+            pDocName = "OpenDrawer",
+            pDataType = "RAW"
+        };
 
-            if (!StartDocPrinter(hPrinter, 1, ref docInfo))
-            {
-                int err = Marshal.GetLastWin32Error();
-                Console.WriteLine($"❌ StartDocPrinter failed: {err}");
-                ClosePrinter(hPrinter);
-                Console.ReadLine();
-                return;
-            }
+        if (!StartDocPrinter(hPrinter, 1, ref docInfo))
+        {
+            int error = Marshal.GetLastWin32Error();
+            Console.WriteLine($"❌ StartDocPrinter failed. Error: {error}");
+            ClosePrinter(hPrinter);
+            Console.ReadLine();
+            return;
+        }
 
-            if (!StartPagePrinter(hPrinter))
-            {
-                Console.WriteLine("❌ StartPagePrinter failed.");
-                EndDocPrinter(hPrinter);
-                ClosePrinter(hPrinter);
-                Console.ReadLine();
-                return;
-            }
-
-            IntPtr unmanagedBytes = Marshal.AllocHGlobal(openDrawerCommand.Length);
-            Marshal.Copy(openDrawerCommand, 0, unmanagedBytes, openDrawerCommand.Length);
-
-            int bytesWritten;
-            bool success = WritePrinter(hPrinter, unmanagedBytes, openDrawerCommand.Length, out bytesWritten);
-            Marshal.FreeHGlobal(unmanagedBytes);
-
-            EndPagePrinter(hPrinter);
+        if (!StartPagePrinter(hPrinter))
+        {
+            int error = Marshal.GetLastWin32Error();
+            Console.WriteLine($"❌ StartPagePrinter failed. Error: {error}");
             EndDocPrinter(hPrinter);
             ClosePrinter(hPrinter);
-
-            if (!success || bytesWritten != openDrawerCommand.Length)
-            {
-                Console.WriteLine("❌ Failed to write data to printer.");
-            }
-            else
-            {
-                Console.WriteLine("✅ Drawer command sent successfully.");
-            }
+            Console.ReadLine();
+            return;
         }
-        catch (Exception ex)
+
+        byte[] drawerCommand = new byte[] { 27, 112, 0, 25, 250 }; // ESC p 0 25 250
+        IntPtr unmanagedBytes = Marshal.AllocHGlobal(drawerCommand.Length);
+        Marshal.Copy(drawerCommand, 0, unmanagedBytes, drawerCommand.Length);
+
+        if (!WritePrinter(hPrinter, unmanagedBytes, drawerCommand.Length, out int bytesWritten))
         {
-            Console.WriteLine($"❗ Error occurred:\n{ex.Message}");
+            int error = Marshal.GetLastWin32Error();
+            Console.WriteLine($"❌ WritePrinter failed. Error: {error}");
+        }
+        else
+        {
+            Console.WriteLine($"✅ Sent drawer command ({bytesWritten} bytes).");
         }
 
-        Console.WriteLine("\nPress Enter to exit...");
+        Marshal.FreeHGlobal(unmanagedBytes);
+        EndPagePrinter(hPrinter);
+        EndDocPrinter(hPrinter);
+        ClosePrinter(hPrinter);
+
+        Console.WriteLine("🎉 Done. Press Enter to exit...");
         Console.ReadLine();
     }
 }

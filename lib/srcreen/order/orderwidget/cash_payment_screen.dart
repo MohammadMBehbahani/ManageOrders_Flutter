@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:manageorders/widgets/number_pad.dart';
 import 'package:manageorders/widgets/print_order.dart';
@@ -36,10 +38,43 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
       }
     });
   }
+  Future<void> openCashDrawer() async {
+    try {
+      final result = await Process.run('OpenDrawer.exe', []);
+
+      if (result.exitCode == 0) {
+       // print('✅ Drawer opened: ${result.stdout}');
+      } else {
+        if (!mounted) return;
+        _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog(context, 'Exception occurred:\n$e');
+    }
+  }
+   void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Drawer Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _handleSubmit() async {
     final cash = double.tryParse(givenCash);
     final order = await widget.onSubmit();
+
+    await openCashDrawer();
 
     if (!mounted) return;
 

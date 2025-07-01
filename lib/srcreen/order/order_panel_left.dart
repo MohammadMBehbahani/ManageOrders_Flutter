@@ -85,8 +85,8 @@ class OrderLeftPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.22)),
-            width: maxPadwidth * 0.5,
+            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.3)),
+            width: maxPadwidth,
             child: ScrollWithTouch(
               child: SingleChildScrollView(
                 child: Wrap(
@@ -178,7 +178,9 @@ class OrderLeftPanel extends StatelessWidget {
                         ),
                         selected: isSelected,
                         backgroundColor: chipColor,
-                        selectedColor: chipColor?.withOpacity(0.7),
+                        selectedColor: chipColor?..withAlpha(
+                                  204,
+                                ),
                         onSelected: (_) => onSubProductSelect(s),
                       );
                     }).toList(),

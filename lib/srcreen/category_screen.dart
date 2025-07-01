@@ -16,23 +16,26 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priorityController = TextEditingController();
+  String? _editingCategoryId;
+  int? _selectedColor;
 
-  Color? _selectedColor;
-  Future<void> _pickColor() async {
-    Color tempColor = _selectedColor ?? Colors.blue;
+  void _pickColor(BuildContext context) {
+    Color pickerColor = Color(_selectedColor ?? Colors.blue.toARGB32());
 
-    await showDialog(
+    showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Pick a color'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: tempColor,
-            onColorChanged: (color) {
-              tempColor = color;
-            },
-            labelTypes: const [],
-            pickerAreaHeightPercent: 0.8,
+        content: StatefulBuilder(
+          builder: (context, setStateDialog) => SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                setStateDialog(() => pickerColor = color);
+              },
+              enableAlpha: false,
+              labelTypes: const [ColorLabelType.hex],
+            ),
           ),
         ),
         actions: [
@@ -43,7 +46,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
           TextButton(
             child: const Text('Select'),
             onPressed: () {
-              setState(() => _selectedColor = tempColor);
+              setState(() => _selectedColor = pickerColor.toARGB32());
               Navigator.of(context).pop();
             },
           ),
@@ -52,15 +55,11 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     );
   }
 
-  String? _editingCategoryId;
-
   Future _submit() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
       final priorityText = _priorityController.text.trim();
-      final color = _selectedColor != null
-          ? '#${_selectedColor!.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}'
-          : null;
+      final color = _selectedColor;
       final priority = int.tryParse(priorityText);
 
       if (_editingCategoryId == null) {
@@ -90,7 +89,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       _editingCategoryId = category.id;
       _nameController.text = category.name;
       _priorityController.text = category.priority?.toString() ?? '';
-     _selectedColor = category.color != null ? Color(int.parse(category.color!.replaceFirst('#', '0x'))) : null;
+      _selectedColor = category.color;
     });
   }
 
@@ -161,20 +160,16 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
                   SizedBox(
                     width: 120,
                     child: GestureDetector(
-                      onTap: _pickColor,
+                      onTap: () => _pickColor(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: _selectedColor ?? Colors.grey[300],
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.black54),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          _selectedColor != null
-                              ? 'Color Picked'
-                              : 'Pick Color',
-                          style: const TextStyle(color: Colors.black),
+                          color: _selectedColor != null
+                              ? Color(_selectedColor!)
+                              : Colors.grey,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                     ),
@@ -210,7 +205,9 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
                       itemBuilder: (_, i) {
                         final cat = sorted[i];
                         return Card(
-                          color: _parseColor(cat.color),
+                          color: cat.color != null
+                              ? Color(cat.color!)
+                              : Colors.white,
                           child: ListTile(
                             title: Text(cat.name),
                             subtitle: cat.priority != null
@@ -247,16 +244,5 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         ),
       ),
     );
-  }
-
-  Color? _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return null;
-    try {
-      hex = hex.replaceAll('#', '');
-      if (hex.length == 6) hex = 'FF$hex'; // add alpha
-      return Color(int.parse('0x$hex'));
-    } catch (_) {
-      return null;
-    }
   }
 }

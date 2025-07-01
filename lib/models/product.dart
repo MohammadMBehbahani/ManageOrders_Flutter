@@ -13,6 +13,8 @@ class Product {
   final List<SubProductOption> availableSubProducts;
   final List<Topping> availableToppings;
   final List<Extra> availableExtras;
+  final int? priority; // nullable
+  final int? color;
 
   Product({
     required this.id,
@@ -23,9 +25,11 @@ class Product {
     List<SubProductOption>? availableSubProducts,
     List<Topping>? availableToppings,
     List<Extra>? availableExtras,
-  })  : availableSubProducts = availableSubProducts ?? [],
-        availableToppings = availableToppings ?? [],
-        availableExtras = availableExtras ?? [];
+    this.color,
+    this.priority,
+  }) : availableSubProducts = availableSubProducts ?? [],
+       availableToppings = availableToppings ?? [],
+       availableExtras = availableExtras ?? [];
 
   Product copyWith({
     String? id,
@@ -36,6 +40,8 @@ class Product {
     List<SubProductOption>? availableSubProducts,
     List<Topping>? availableToppings,
     List<Extra>? availableExtras,
+    int? priority,
+    int? color,
   }) {
     return Product(
       id: id ?? this.id,
@@ -46,6 +52,8 @@ class Product {
       availableSubProducts: availableSubProducts ?? this.availableSubProducts,
       availableToppings: availableToppings ?? this.availableToppings,
       availableExtras: availableExtras ?? this.availableExtras,
+      color: color ?? this.color,
+      priority: priority ?? this.priority,
     );
   }
 
@@ -58,19 +66,21 @@ class Product {
       basePrice: (map['basePrice'] ?? 0).toDouble(),
       availableSubProducts: map['availableSubProducts'] != null
           ? (jsonDecode(map['availableSubProducts']) as List<dynamic>)
-              .map((e) => SubProductOption.fromMap(e))
-              .toList()
+                .map((e) => SubProductOption.fromMap(e))
+                .toList()
           : [],
       availableToppings: map['availableToppings'] != null
           ? (jsonDecode(map['availableToppings']) as List<dynamic>)
-              .map((e) => Topping.fromMap(e))
-              .toList()
+                .map((e) => Topping.fromMap(e))
+                .toList()
           : [],
       availableExtras: map['availableExtras'] != null
           ? (jsonDecode(map['availableExtras']) as List<dynamic>)
-                  .map((e) => Extra.fromMap(e))
-                  .toList()
+                .map((e) => Extra.fromMap(e))
+                .toList()
           : [],
+      priority: map['priority'],
+      color: map['color'],
     );
   }
 
@@ -81,13 +91,17 @@ class Product {
       'name': name,
       'description': description,
       'basePrice': basePrice,
-      'availableSubProducts':
-          jsonEncode(availableSubProducts.map((e) => e.toMap()).toList()),
-      'availableToppings':
-          jsonEncode(availableToppings.map((e) => e.toMap()).toList()),
-      'availableExtras':
-          jsonEncode(availableExtras.map((e) => e.toMap()).toList()),
+      'availableSubProducts': jsonEncode(
+        availableSubProducts.map((e) => e.toMap()).toList(),
+      ),
+      'availableToppings': jsonEncode(
+        availableToppings.map((e) => e.toMap()).toList(),
+      ),
+      'availableExtras': jsonEncode(
+        availableExtras.map((e) => e.toMap()).toList(),
+      ),
+      'priority': priority,
+      'color': color,
     };
   }
-
 }

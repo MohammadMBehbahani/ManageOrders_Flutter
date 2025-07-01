@@ -2,7 +2,7 @@ class Category {
   final String id;
   final String name;
   final int? priority; // Optional
-  final String? color;
+  final int? color;
 
   Category({
     required this.id, 
@@ -16,7 +16,7 @@ class Category {
       id: map['id'], 
       name: map['name'],
       priority: map['priority'], // Nullable
-      color: map['color'], 
+      color: map['color'] as int?, 
     );
   }
 

@@ -14,7 +14,7 @@ class CategoryNotifier extends AsyncNotifier<List<Category>> {
     return await CategoryDatabase.getAllCategories();
   }
 
-  Future<void> addCategory(String name, {int? priority, String? color}) async {
+  Future<void> addCategory(String name, {int? priority, int? color}) async {
     final newCategory = Category(
       id: const Uuid().v4(),
       name: name,
@@ -29,7 +29,7 @@ class CategoryNotifier extends AsyncNotifier<List<Category>> {
     String id,
     String newName, {
     int? priority,
-    String? color,
+    int? color,
   }) async {
     final updated = Category(
       id: id,

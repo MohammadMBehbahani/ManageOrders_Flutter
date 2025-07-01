@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/sub_product_option.dart';
@@ -20,17 +21,51 @@ class _AddSubProductOptionsScreenState
   final List<SubProductOption> _newOptions = [];
   String _name = '';
   String _price = '';
+  int? _color;
+  int? _priority;
 
   late Product _currentProduct;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with latest product from provider if possible
     final products = ref.read(productProvider).value ?? [];
     _currentProduct = products.firstWhere(
       (p) => p.id == widget.product.id,
       orElse: () => widget.product,
+    );
+  }
+
+  void _pickColor() {
+    Color pickerColor = Color(_color ?? Colors.blue.toARGB32());
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) {
+              pickerColor = color;
+            },
+            enableAlpha: false,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _color = pickerColor.toARGB32());
+              Navigator.of(context).pop();
+            },
+            child: const Text('Select'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -41,11 +76,15 @@ class _AddSubProductOptionsScreenState
         id: const Uuid().v4(),
         name: _name,
         additionalPrice: double.parse(_price),
+        color: _color,
+        priority: _priority,
       );
       setState(() {
         _newOptions.add(newOption);
         _name = '';
         _price = '';
+        _color = null;
+        _priority = null;
       });
       _formKey.currentState!.reset();
     }
@@ -70,7 +109,6 @@ class _AddSubProductOptionsScreenState
 
     if (confirm == true) {
       setState(() {
-        // Remove from existing options or newly added options
         if (_currentProduct.availableSubProducts.any((opt) => opt.id == option.id)) {
           _currentProduct = _currentProduct.copyWith(
             availableSubProducts: _currentProduct.availableSubProducts.where((opt) => opt.id != option.id).toList(),
@@ -83,7 +121,6 @@ class _AddSubProductOptionsScreenState
   }
 
   Future<void> _save() async {
-    // Merge existing (minus deleted) + new options
     final mergedOptions = [
       ..._currentProduct.availableSubProducts,
       ..._newOptions.where((newOpt) =>
@@ -99,7 +136,6 @@ class _AddSubProductOptionsScreenState
 
   @override
   Widget build(BuildContext context) {
-    // Show combined list of existing + new options
     final combinedOptions = [
       ..._currentProduct.availableSubProducts,
       ..._newOptions,
@@ -124,12 +160,8 @@ class _AddSubProductOptionsScreenState
                       initialValue: _name,
                     ),
                     TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Additional Price',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      decoration: const InputDecoration(labelText: 'Additional Price'),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: (val) {
                         if (val == null || val.isEmpty) return 'Required';
                         if (double.tryParse(val) == null) {
@@ -139,6 +171,35 @@ class _AddSubProductOptionsScreenState
                       },
                       onSaved: (val) => _price = val!,
                       initialValue: _price,
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Priority (optional)'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (val) => _priority = int.tryParse(val),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Text('Color:'),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: _pickColor,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: _color != null ? Color(_color!) : Colors.grey,
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                        ),
+                        if (_color != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text('#${_color!.toRadixString(16).padLeft(8, '0').toUpperCase()}'),
+                          )
+                      ],
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton(

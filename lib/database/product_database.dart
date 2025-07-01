@@ -16,7 +16,13 @@ class ProductDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute("ALTER TABLE products ADD COLUMN priority INTEGER");
+          await db.execute("ALTER TABLE products ADD COLUMN color INTEGER");
+        }
+      },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE products (
@@ -27,7 +33,9 @@ class ProductDatabase {
             basePrice REAL,
             availableSubProducts TEXT,
             availableToppings TEXT,
-            availableExtras TEXT
+            availableExtras TEXT,
+            priority INTEGER,
+            color INTEGER
           )
         ''');
       },

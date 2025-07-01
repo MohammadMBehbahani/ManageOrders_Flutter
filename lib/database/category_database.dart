@@ -16,13 +16,40 @@ class CategoryDatabase {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           await db.execute(
             'ALTER TABLE categories ADD COLUMN priority INTEGER',
           );
           await db.execute('ALTER TABLE categories ADD COLUMN color TEXT');
+        }
+        if (oldVersion < 3) {
+          // Step 1: Rename old table
+          await db.execute('ALTER TABLE categories RENAME TO categories_old');
+
+          // Step 2: Create new table with correct schema
+          await _createDB(db, newVersion);
+
+          // Step 3: Copy data into new table (convert color if needed)
+          final oldData = await db.query('categories_old');
+
+          for (final row in oldData) {
+            await db.insert('categories', {
+              'id': row['id'],
+              'name': row['name'],
+              'priority': row['priority'],
+              'color': row['color']!= null 
+                  ?row['color'] is int
+                  ? row['color']
+                  : row['color'] != null
+                  ? int.tryParse(row['color'].toString()) ?? 0
+                  : null
+                  : null,
+            });
+          }
+          // Step 4: Drop old table
+          await db.execute('DROP TABLE categories_old');
         }
       },
       onCreate: (db, version) async {
@@ -36,6 +63,17 @@ class CategoryDatabase {
         ''');
       },
     );
+  }
+
+  static Future<void> _createDB(Database db, int version) async {
+    await db.execute('''
+    CREATE TABLE categories (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      priority INTEGER,
+      color INTEGER
+    )
+  ''');
   }
 
   static Future<List<Category>> getAllCategories() async {

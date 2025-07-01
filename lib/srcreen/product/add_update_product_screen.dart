@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/providers/category_provider.dart';
@@ -20,6 +21,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _priceController;
   String? _selectedCategoryId;
+  int? _selectedColor;
+  int? _priority;
 
   @override
   void initState() {
@@ -32,6 +35,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       text: widget.product?.basePrice.toString() ?? '',
     );
     _selectedCategoryId = widget.product?.categoryId;
+    _selectedColor = widget.product?.color;
+    _priority = widget.product?.priority;
   }
 
   @override
@@ -57,6 +62,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             description: _descriptionController.text.trim(),
             basePrice: double.tryParse(_priceController.text.trim()) ?? 0,
             categoryId: _selectedCategoryId!,
+            color: _selectedColor,
+            priority: _priority,
           ) ??
           Product(
             id: const Uuid().v4(),
@@ -64,10 +71,47 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             name: _nameController.text.trim(),
             description: _descriptionController.text.trim(),
             basePrice: double.tryParse(_priceController.text.trim()) ?? 0,
+            color: _selectedColor,
+            priority: _priority,
           );
 
       Navigator.of(context).pop(updatedProduct);
     }
+  }
+
+  void _pickColor(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        Color pickerColor = Color(_selectedColor ?? Colors.blue.toARGB32());
+        return AlertDialog(
+          title: const Text('Pick a color'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
+              enableAlpha: false,
+              labelTypes: const [ColorLabelType.hex],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Select'),
+              onPressed: () {
+                setState(() => _selectedColor = pickerColor.toARGB32());
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -128,6 +172,44 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: _priority?.toString() ?? '',
+                    decoration: const InputDecoration(labelText: 'Priority'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (val) {
+                      setState(() {
+                        _priority = int.tryParse(val);
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text('Color:'),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () => _pickColor(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _selectedColor != null
+                                ? Color(_selectedColor!)
+                                : Colors.grey,
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      if (_selectedColor != null)
+                        Text(
+                          '#${_selectedColor!.toRadixString(16).padLeft(8, '0').toUpperCase()}',
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(

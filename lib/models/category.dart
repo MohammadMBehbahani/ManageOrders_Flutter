@@ -1,16 +1,31 @@
 class Category {
   final String id;
   final String name;
+  final int? priority; // Optional
+  final String? color;
 
-  Category({required this.id, required this.name});
+  Category({
+    required this.id, 
+    required this.name, 
+    this.priority, 
+    this.color
+  });
+
   factory Category.fromMap(Map<String, dynamic> map) {
     return Category(
-      id: map['id'],
+      id: map['id'], 
       name: map['name'],
+      priority: map['priority'], // Nullable
+      color: map['color'], 
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name};
+    return {
+      'id': id, 
+      'name': name,
+      'priority': priority,
+      'color': color,
+    };
   }
 }

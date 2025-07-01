@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/providers/category_provider.dart';
@@ -14,23 +15,83 @@ class CategoryScreen extends ConsumerStatefulWidget {
 class _CategoryScreenState extends ConsumerState<CategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _priorityController = TextEditingController();
+
+  Color? _selectedColor;
+  Future<void> _pickColor() async {
+    Color tempColor = _selectedColor ?? Colors.blue;
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: tempColor,
+            onColorChanged: (color) {
+              tempColor = color;
+            },
+            labelTypes: const [],
+            pickerAreaHeightPercent: 0.8,
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: const Text('Select'),
+            onPressed: () {
+              setState(() => _selectedColor = tempColor);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   String? _editingCategoryId;
 
   Future _submit() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
+      final priorityText = _priorityController.text.trim();
+      final color = _selectedColor != null
+          ? '#${_selectedColor!.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}'
+          : null;
+      final priority = int.tryParse(priorityText);
 
       if (_editingCategoryId == null) {
-        await ref.read(categoryProvider.notifier).addCategory(name);
+        await ref
+            .read(categoryProvider.notifier)
+            .addCategory(name, priority: priority, color: color);
       } else {
         await ref
             .read(categoryProvider.notifier)
-            .updateCategory(_editingCategoryId!, name);
+            .updateCategory(
+              _editingCategoryId!,
+              name,
+              priority: priority,
+              color: color,
+            );
       }
 
       _nameController.clear();
+      _priorityController.clear();
       _editingCategoryId = null;
+      setState(() => _selectedColor = null);
     }
+  }
+
+  void _editCategory(Category category) {
+    setState(() {
+      _editingCategoryId = category.id;
+      _nameController.text = category.name;
+      _priorityController.text = category.priority?.toString() ?? '';
+     _selectedColor = category.color != null ? Color(int.parse(category.color!.replaceFirst('#', '0x'))) : null;
+    });
   }
 
   void _deleteCategory(String id) {
@@ -56,13 +117,6 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     );
   }
 
-  void _editCategory(Category category) {
-    setState(() {
-      _editingCategoryId = category.id;
-      _nameController.text = category.name;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final asyncCategories = ref.watch(categoryProvider);
@@ -73,27 +127,58 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// FORM
             Form(
               key: _formKey,
-              child: Row(
+              child: Wrap(
+                runSpacing: 12,
+                spacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 200,
                     child: TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Category Name',
+                        labelText: 'Name',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (val) {
-                        if (val == null || val.trim().isEmpty) {
-                          return 'Enter a category name';
-                        }
-                        return null;
-                      },
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Enter name'
+                          : null,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 100,
+                    child: TextFormField(
+                      controller: _priorityController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Priority',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 120,
+                    child: GestureDetector(
+                      onTap: _pickColor,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _selectedColor ?? Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.black54),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _selectedColor != null
+                              ? 'Color Picked'
+                              : 'Pick Color',
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
                   ElevatedButton(
                     onPressed: _submit,
                     child: Text(_editingCategoryId == null ? 'Add' : 'Update'),
@@ -102,8 +187,6 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            /// CATEGORY LIST
             Expanded(
               child: asyncCategories.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -113,23 +196,41 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
                     return const Center(child: Text('No categories found.'));
                   }
 
+                  final sorted = [...categories]
+                    ..sort((a, b) {
+                      if (a.priority == null && b.priority == null) return 0;
+                      if (a.priority == null) return 1;
+                      if (b.priority == null) return -1;
+                      return a.priority!.compareTo(b.priority!);
+                    });
+
                   return ScrollWithTouch(
                     child: ListView.builder(
-                      itemCount: categories.length,
+                      itemCount: sorted.length,
                       itemBuilder: (_, i) {
-                        final cat = categories[i];
+                        final cat = sorted[i];
                         return Card(
+                          color: _parseColor(cat.color),
                           child: ListTile(
                             title: Text(cat.name),
+                            subtitle: cat.priority != null
+                                ? Text('Priority: ${cat.priority}')
+                                : null,
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
+                                  ),
                                   onPressed: () => _editCategory(cat),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
                                   onPressed: () => _deleteCategory(cat.id),
                                 ),
                               ],
@@ -146,5 +247,16 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         ),
       ),
     );
+  }
+
+  Color? _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    try {
+      hex = hex.replaceAll('#', '');
+      if (hex.length == 6) hex = 'FF$hex'; // add alpha
+      return Color(int.parse('0x$hex'));
+    } catch (_) {
+      return null;
+    }
   }
 }

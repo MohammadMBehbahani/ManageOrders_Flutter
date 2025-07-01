@@ -4,7 +4,9 @@ import 'package:manageorders/models/category.dart';
 import 'package:uuid/uuid.dart';
 
 final categoryProvider =
-    AsyncNotifierProvider<CategoryNotifier, List<Category>>(CategoryNotifier.new);
+    AsyncNotifierProvider<CategoryNotifier, List<Category>>(
+      CategoryNotifier.new,
+    );
 
 class CategoryNotifier extends AsyncNotifier<List<Category>> {
   @override
@@ -12,14 +14,29 @@ class CategoryNotifier extends AsyncNotifier<List<Category>> {
     return await CategoryDatabase.getAllCategories();
   }
 
-  Future<void> addCategory(String name) async {
-    final newCategory = Category(id: const Uuid().v4(), name: name);
+  Future<void> addCategory(String name, {int? priority, String? color}) async {
+    final newCategory = Category(
+      id: const Uuid().v4(),
+      name: name,
+      priority: priority,
+      color: color,
+    );
     await CategoryDatabase.insertCategory(newCategory);
     state = AsyncData([...state.value ?? [], newCategory]);
   }
 
-  Future<void> updateCategory(String id, String newName) async {
-    final updated = Category(id: id, name: newName);
+  Future<void> updateCategory(
+    String id,
+    String newName, {
+    int? priority,
+    String? color,
+  }) async {
+    final updated = Category(
+      id: id,
+      name: newName,
+      priority: priority,
+      color: color,
+    );
     await CategoryDatabase.updateCategory(updated);
     state = AsyncData([
       for (final c in state.value ?? [])

@@ -16,12 +16,22 @@ class CategoryDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE categories ADD COLUMN priority INTEGER',
+          );
+          await db.execute('ALTER TABLE categories ADD COLUMN color TEXT');
+        }
+      },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE categories (
             id TEXT PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            priority INTEGER,
+            color TEXT
           )
         ''');
       },
@@ -36,8 +46,11 @@ class CategoryDatabase {
 
   static Future<void> insertCategory(Category category) async {
     final db = await database;
-    await db.insert('categories', category.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'categories',
+      category.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> updateCategory(Category category) async {

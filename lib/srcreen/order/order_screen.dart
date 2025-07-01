@@ -325,12 +325,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       appBar: AppBar(title: const Text('Create Order')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 1000;
-          if (isWide) {
+       
             return Row(
               children: [
                 // LEFT PANEL
                 Expanded(
+                  flex: 4,
                   child: OrderLeftPanel(
                     onAddToOrder: _addCurrentItemToOrder,
                     onAddExtra: _openExtraDialog,
@@ -352,6 +352,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
                 // RIGHT PANEL (Order summary)
                 Expanded(
+                  flex: 2,
                   child: OrderRightPanel(
                     onquantityInc: (index) => ref
                         .read(orderProvider.notifier)
@@ -397,81 +398,8 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 ),
               ],
             );
-          } else {
-            return SizedBox(
-              height: constraints.maxHeight, // full screen height
-              child: Column(
-                children: [
-                  Expanded(
-                    child: OrderLeftPanel(
-                      onAddToOrder: _addCurrentItemToOrder,
-                      onAddExtra: _openExtraDialog,
-                      onAddTopping: _openToppingDialog,
-                      categories: categories,
-                      filteredProducts: filteredProducts,
-                      selectedCategoryId: selectedCategoryId,
-                      selectedProduct: selectedProduct,
-                      selectedSubProduct: selectedSubProduct,
-                      selectedExtras: selectedExtras,
-                      selectedToppings: selectedToppings,
-                      onCategorySelect: onCategorySelect,
-                      onProductSelect: onProductSelect,
-                      onSubProductSelect: onSubProductSelect,
-                      onRemoveExtra: onRemoveExtra,
-                      onRemoveTopping: onRemoveTopping,
-                    ),
-                  ),
-
-                  const Divider(thickness: 2),
-                  Expanded(
-                    child: OrderRightPanel(
-                      onquantityInc: (index) => ref
-                          .read(orderProvider.notifier)
-                          .increaseQuantity(index),
-                      onquantityDec: (index) => ref
-                          .read(orderProvider.notifier)
-                          .decreaseQuantity(index),
-                      onAddItem: _addSimpleItem,
-                      orderItems: orderItems,
-                      selectedDiscount: selectedDiscount,
-                      finalTotal: finalTotal,
-                      isPrintChecked: isPrintChecked,
-                      onPrintToggle: (value) =>
-                          setState(() => isPrintChecked = value ?? false),
-                      onAddDiscount: _openDiscountDialog,
-                      onRemoveDiscount: onRemoveDiscount,
-                      onSubmitCash: () async => await _submitOrder('cash'),
-                      onSubmitCard: () async => _submitOrder('card'),
-                      onRemoveItem: (index) =>
-                          ref.read(orderProvider.notifier).removeItem(index),
-                      onRemoveTopping: (itemIndex, toppingIndex) {
-                        final item = orderItems[itemIndex];
-                        final newToppings = [...item.toppings!]
-                          ..removeAt(toppingIndex);
-                        final updated = item.copyWith(toppings: newToppings);
-                        final updatedItems = [...orderItems];
-                        updatedItems[itemIndex] = updated;
-                        ref
-                            .read(orderProvider.notifier)
-                            .updateItems(updatedItems);
-                      },
-                      onRemoveExtra: (itemIndex, extraIndex) {
-                        final item = orderItems[itemIndex];
-                        final newExtras = [...item.extras!]
-                          ..removeAt(extraIndex);
-                        final updated = item.copyWith(extras: newExtras);
-                        final updatedItems = [...orderItems];
-                        updatedItems[itemIndex] = updated;
-                        ref
-                            .read(orderProvider.notifier)
-                            .updateItems(updatedItems);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+           
+          
         },
       ),
     );

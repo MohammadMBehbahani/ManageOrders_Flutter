@@ -330,7 +330,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
               children: [
                 // LEFT PANEL
                 Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: OrderLeftPanel(
                     onAddToOrder: _addCurrentItemToOrder,
                     onAddExtra: _openExtraDialog,
@@ -352,7 +352,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
                 // RIGHT PANEL (Order summary)
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: OrderRightPanel(
                     onquantityInc: (index) => ref
                         .read(orderProvider.notifier)

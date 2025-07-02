@@ -85,7 +85,7 @@ class OrderLeftPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.3)),
+            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.25)),
             width: maxPadwidth,
             child: ScrollWithTouch(
               child: SingleChildScrollView(
@@ -124,7 +124,7 @@ class OrderLeftPanel extends StatelessWidget {
           ),
           const Divider(),
           SizedBox(
-            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.3)),
+            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.35)),
             width: maxPadwidth.clamp(minPadwidth, maxPadwidth),
             child: ScrollWithTouch(
               child: SingleChildScrollView(

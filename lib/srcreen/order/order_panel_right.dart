@@ -48,7 +48,6 @@ class OrderRightPanel extends StatelessWidget {
         children: [
           Expanded(
             child: ScrollWithTouch(
-              
               child: ListView.builder(
                 itemCount: orderItems.length,
                 itemBuilder: (_, i) {
@@ -70,7 +69,6 @@ class OrderRightPanel extends StatelessWidget {
                               icon: const Icon(Icons.add, color: Colors.green),
                               onPressed: () => onquantityInc(i),
                             ),
-                            
                           ],
                         ),
 
@@ -159,27 +157,21 @@ class OrderRightPanel extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
+                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                icon: const Icon(Icons.percent, size: 24),
+                icon: const Icon(Icons.percent, size: 18),
                 label: const Text('Add Discount'),
                 onPressed: onAddDiscount,
                 // _openDiscountDialog,
               ),
-              SizedBox(height: 10),
+
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
+                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                icon: const Icon(Icons.add_circle, size: 24),
+                icon: const Icon(Icons.add_circle, size: 18),
                 label: const Text('Add item'),
                 onPressed: onAddItem, //(){},
                 // _openDiscountDialog,
@@ -187,35 +179,24 @@ class OrderRightPanel extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                icon: const Icon(Icons.payment, size: 24),
-                label: const Text('Submit Cash'),
-                onPressed: onSubmitCash,
-              ),
-              SizedBox(height: 10),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                icon: const Icon(Icons.payment, size: 24),
-                label: const Text('Submit Card'),
-                onPressed: onSubmitCard,
-              ),
-            ],
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: const TextStyle(fontSize: 30),
+            ),
+            icon: const Icon(Icons.payment, size: 18),
+            label: const Text('Submit Cash'),
+            onPressed: onSubmitCash,
+          ),
+          SizedBox(height: 10),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              textStyle: const TextStyle(fontSize: 30),
+            ),
+            icon: const Icon(Icons.payment, size: 18),
+            label: const Text('Submit Card'),
+            onPressed: onSubmitCard,
           ),
         ],
       ),

@@ -219,14 +219,19 @@ class _AddSubProductOptionsScreenState
                     itemBuilder: (context, index) {
                       final opt = combinedOptions[index];
                       final isNew = _newOptions.any((n) => n.id == opt.id);
-                      return ListTile(
-                        title: Text(opt.name),
-                        subtitle: Text('Additional Price: £${opt.additionalPrice.toStringAsFixed(2)}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteOption(opt),
+                      return Card(
+                        color: opt.color != null
+                              ? Color(opt.color!)
+                              : Colors.white,
+                        child: ListTile(
+                          title: Text(opt.name),
+                          subtitle: Text('Additional Price: £${opt.additionalPrice.toStringAsFixed(2)} • priority: ${opt.priority?? ''}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteOption(opt),
+                          ),
+                          tileColor: isNew ? Colors.green.withAlpha((0.1 * 255).round()) : null,
                         ),
-                        tileColor: isNew ? Colors.green.withAlpha((0.1 * 255).round()) : null,
                       );
                     },
                   ),

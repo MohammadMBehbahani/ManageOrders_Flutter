@@ -24,33 +24,28 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   // To track product being edited (null means adding)
   Product? editingProduct;
 
-  void _openProductScreen([Product? product]) async{
+  void _openProductScreen([Product? product]) async {
     setState(() {
       editingProduct = product;
     });
 
     final savedProduct = await Navigator.of(context).push<Product>(
       MaterialPageRoute(
-        builder: (context) => ProductFormScreen(
-          product: product,
-        ),
+        builder: (context) => ProductFormScreen(product: product),
       ),
     );
 
-   if (savedProduct != null) {
-    final notifier = ref.read(productProvider.notifier);
-    if (product == null) {
-      // Add new
-      await notifier.addProduct(
-        savedProduct.copyWith(id: const Uuid().v4()),
-      );
-    } else {
-      // Update existing
-      await notifier.updateProduct(savedProduct);
+    if (savedProduct != null) {
+      final notifier = ref.read(productProvider.notifier);
+      if (product == null) {
+        // Add new
+        await notifier.addProduct(savedProduct.copyWith(id: const Uuid().v4()));
+      } else {
+        // Update existing
+        await notifier.updateProduct(savedProduct);
+      }
     }
   }
-  }
-
 
   void _confirmDelete(String productId) {
     showDialog(
@@ -177,7 +172,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                       child: filteredProducts.isEmpty
                           ? const Center(child: Text('No products found.'))
                           : ScrollWithTouch(
-                            child: ListView.builder(
+                              child: ListView.builder(
                                 itemCount: filteredProducts.length,
                                 itemBuilder: (context, index) {
                                   final p = filteredProducts[index];
@@ -188,12 +183,16 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                             Category(id: '', name: 'Unknown'),
                                       )
                                       .name;
-                            
+
                                   return Card(
+                                    color: p.color != null
+                                        ? Color(p.color!)
+                                        : Colors.white,
+
                                     child: ListTile(
                                       title: Text(p.name),
                                       subtitle: Text(
-                                        '£${p.basePrice.toStringAsFixed(2)} • $categoryName',
+                                        '£${p.basePrice.toStringAsFixed(2)} • $categoryName • priority: ${p.priority?? ''}',
                                       ),
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -201,15 +200,17 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                           IconButton(
                                             icon: const Icon(Icons.edit),
                                             tooltip: 'Edit product',
-                                            onPressed: () => _openProductScreen(p),
+                                            onPressed: () =>
+                                                _openProductScreen(p),
                                           ),
                                           IconButton(
                                             icon: const Icon(Icons.delete),
                                             tooltip: 'Delete product',
                                             color: Colors.red,
-                                            onPressed: () => _confirmDelete(p.id),
+                                            onPressed: () =>
+                                                _confirmDelete(p.id),
                                           ),
-                            
+
                                           // Add Extra
                                           IconButton(
                                             icon: const Icon(
@@ -228,7 +229,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                               );
                                             },
                                           ),
-                            
+
                                           // Add Topping
                                           IconButton(
                                             icon: const Icon(
@@ -247,7 +248,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                               );
                                             },
                                           ),
-                            
+
                                           // Add SubProductOption
                                           IconButton(
                                             icon: const Icon(
@@ -272,7 +273,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                   );
                                 },
                               ),
-                          ),
+                            ),
                     ),
                   ],
                 );

@@ -46,28 +46,28 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
        // print('✅ Drawer opened: ${result.stdout}');
       } else {
         if (!mounted) return;
-        _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
+      //  _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
       }
     } catch (e) {
       if (!mounted) return;
-      _showErrorDialog(context, 'Exception occurred:\n$e');
+     // _showErrorDialog(context, 'Exception occurred:\n$e');
     }
   }
-   void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Drawer Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+  //  void _showErrorDialog(BuildContext context, String message) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       title: const Text('Drawer Error'),
+  //       content: Text(message),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(ctx).pop(),
+  //           child: const Text('OK'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
 
   Future<void> _handleSubmit() async {

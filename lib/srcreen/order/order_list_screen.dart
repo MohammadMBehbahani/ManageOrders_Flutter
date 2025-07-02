@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:manageorders/main.dart';
 import 'package:manageorders/models/order.dart';
 import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
 import 'package:manageorders/widgets/print_all_orders.dart';
 import 'package:manageorders/widgets/print_order.dart';
@@ -17,10 +19,29 @@ class SubmittedOrdersScreen extends ConsumerStatefulWidget {
       _SubmittedOrdersScreenState();
 }
 
-class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
+class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
+    with RouteAware {
   Order? selectedOrder;
   DateTime? fromDate;
   DateTime? toDate;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    // Called when coming back to this screen
+    ref.read(submittedOrdersProvider.notifier).refreshOrders();
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -101,7 +122,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
       final result = await Process.run('OpenDrawer.exe', []);
 
       if (result.exitCode == 0) {
-       // print('✅ Drawer opened: ${result.stdout}');
+        // print('✅ Drawer opened: ${result.stdout}');
       } else {
         if (!mounted) return;
         _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
@@ -110,6 +131,12 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
       if (!mounted) return;
       _showErrorDialog(context, 'Exception occurred:\n$e');
     }
+  }
+
+  void _editOrder(Order order) async {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => OrderScreen(orderToEdit: order)));
   }
 
   void _showErrorDialog(BuildContext context, String message) {
@@ -149,6 +176,13 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen> {
                       ? () => _printOrder(selectedOrder!)
                       : null,
                   child: const Text('Print Selected'),
+                ),
+                const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: selectedOrder != null
+                      ? () => _editOrder(selectedOrder!)
+                      : null,
+                  child: const Text('Edit Selected'),
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(

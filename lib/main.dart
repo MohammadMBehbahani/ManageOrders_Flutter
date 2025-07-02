@@ -12,6 +12,7 @@ import 'package:manageorders/srcreen/product/product_screen.dart';
 import 'package:manageorders/srcreen/topping_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -26,7 +27,9 @@ class ManageOrdersApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       initialRoute: '/home_screen',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_extra.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/sub_product_option.dart';
@@ -10,6 +11,7 @@ import 'package:manageorders/providers/category_provider.dart';
 import 'package:manageorders/providers/extra_provider.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/order_provider.dart';
+import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:manageorders/providers/topping_provider.dart';
 import 'package:manageorders/srcreen/order/order_panel_left.dart';
 import 'package:manageorders/srcreen/order/order_panel_right.dart';
@@ -22,18 +24,30 @@ import 'package:manageorders/widgets/print_order.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
-  const OrderScreen({super.key});
+  final Order? orderToEdit;
+
+  const OrderScreen({super.key, this.orderToEdit});
 
   @override
   ConsumerState<OrderScreen> createState() => _OrderScreenState();
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
+  Order? get editingOrder => widget.orderToEdit;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(orderProvider.notifier).clearOrder();
+      if (editingOrder != null) {
+        ref.read(orderProvider.notifier).updateItems(editingOrder!.items);
+        setState(() {
+          selectedCategoryId = editingOrder!.items.first.product.categoryId;
+          // Optionally set product, sub-product, extras, etc.
+        });
+      } else {
+        ref.read(orderProvider.notifier).clearOrder();
+      }
     });
   }
 
@@ -190,19 +204,13 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           builder: (_) => CashPaymentScreen(
             totalAmount: total,
             isPrintChecked: isPrintChecked,
-            onSubmit: () async {
-              final submittedOrder = await ref
+            onSubmit: () async =>
+              await ref
                   .read(orderProvider.notifier)
                   .submitOrder(
                     paymentMethod: paymentMethod,
                     discount: selectedDiscount,
-                  );
-              setState(() {
-                selectedDiscount = null;
-                isPrintChecked = false;
-              });
-              return submittedOrder;
-            },
+                  )
           ),
         ),
       );
@@ -226,11 +234,16 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           ),
         );
       }
-      setState(() {
-        selectedDiscount = null;
-        isPrintChecked = false;
-      });
     }
+
+    if (editingOrder != null) {
+      final notifier = ref.read(submittedOrdersProvider.notifier);
+      await notifier.deleteOrder(editingOrder!.id);
+    }
+    setState(() {
+      selectedDiscount = null;
+      isPrintChecked = false;
+    });
   }
 
   void onCategorySelect(String categoryId) {
@@ -325,81 +338,72 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       appBar: AppBar(title: const Text('Create Order')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-       
-            return Row(
-              children: [
-                // LEFT PANEL
-                Expanded(
-                  flex: 4,
-                  child: OrderLeftPanel(
-                    onAddToOrder: _addCurrentItemToOrder,
-                    onAddExtra: _openExtraDialog,
-                    onAddTopping: _openToppingDialog,
-                    categories: categories,
-                    filteredProducts: filteredProducts,
-                    selectedCategoryId: selectedCategoryId,
-                    selectedProduct: selectedProduct,
-                    selectedSubProduct: selectedSubProduct,
-                    selectedExtras: selectedExtras,
-                    selectedToppings: selectedToppings,
-                    onCategorySelect: onCategorySelect,
-                    onProductSelect: onProductSelect,
-                    onSubProductSelect: onSubProductSelect,
-                    onRemoveExtra: onRemoveExtra,
-                    onRemoveTopping: onRemoveTopping,
-                  ),
+          return Row(
+            children: [
+              // LEFT PANEL
+              Expanded(
+                flex: 4,
+                child: OrderLeftPanel(
+                  onAddToOrder: _addCurrentItemToOrder,
+                  onAddExtra: _openExtraDialog,
+                  onAddTopping: _openToppingDialog,
+                  categories: categories,
+                  filteredProducts: filteredProducts,
+                  selectedCategoryId: selectedCategoryId,
+                  selectedProduct: selectedProduct,
+                  selectedSubProduct: selectedSubProduct,
+                  selectedExtras: selectedExtras,
+                  selectedToppings: selectedToppings,
+                  onCategorySelect: onCategorySelect,
+                  onProductSelect: onProductSelect,
+                  onSubProductSelect: onSubProductSelect,
+                  onRemoveExtra: onRemoveExtra,
+                  onRemoveTopping: onRemoveTopping,
                 ),
+              ),
 
-                // RIGHT PANEL (Order summary)
-                Expanded(
-                  flex: 2,
-                  child: OrderRightPanel(
-                    onquantityInc: (index) => ref
-                        .read(orderProvider.notifier)
-                        .increaseQuantity(index),
-                    onquantityDec: (index) => ref
-                        .read(orderProvider.notifier)
-                        .decreaseQuantity(index),
-                    orderItems: orderItems,
-                    onAddItem: _addSimpleItem,
-                    selectedDiscount: selectedDiscount,
-                    finalTotal: finalTotal,
-                    isPrintChecked: isPrintChecked,
-                    onPrintToggle: (value) =>
-                        setState(() => isPrintChecked = value ?? false),
-                    onAddDiscount: _openDiscountDialog,
-                    onRemoveDiscount: onRemoveDiscount,
-                    onSubmitCash: () async => await _submitOrder('cash'),
-                    onSubmitCard: () async => _submitOrder('card'),
-                    onRemoveItem: (index) =>
-                        ref.read(orderProvider.notifier).removeItem(index),
-                    onRemoveTopping: (itemIndex, toppingIndex) {
-                      final item = orderItems[itemIndex];
-                      final newToppings = [...item.toppings!]
-                        ..removeAt(toppingIndex);
-                      final updated = item.copyWith(toppings: newToppings);
-                      final updatedItems = [...orderItems];
-                      updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
-                    },
-                    onRemoveExtra: (itemIndex, extraIndex) {
-                      final item = orderItems[itemIndex];
-                      final newExtras = [...item.extras!]..removeAt(extraIndex);
-                      final updated = item.copyWith(extras: newExtras);
-                      final updatedItems = [...orderItems];
-                      updatedItems[itemIndex] = updated;
-                      ref
-                          .read(orderProvider.notifier)
-                          .updateItems(updatedItems);
-                    },
-                  ),
+              // RIGHT PANEL (Order summary)
+              Expanded(
+                flex: 2,
+                child: OrderRightPanel(
+                  onquantityInc: (index) =>
+                      ref.read(orderProvider.notifier).increaseQuantity(index),
+                  onquantityDec: (index) =>
+                      ref.read(orderProvider.notifier).decreaseQuantity(index),
+                  orderItems: orderItems,
+                  onAddItem: _addSimpleItem,
+                  selectedDiscount: selectedDiscount,
+                  finalTotal: finalTotal,
+                  isPrintChecked: isPrintChecked,
+                  onPrintToggle: (value) =>
+                      setState(() => isPrintChecked = value ?? false),
+                  onAddDiscount: _openDiscountDialog,
+                  onRemoveDiscount: onRemoveDiscount,
+                  onSubmitCash: () async => await _submitOrder('cash'),
+                  onSubmitCard: () async => _submitOrder('card'),
+                  onRemoveItem: (index) =>
+                      ref.read(orderProvider.notifier).removeItem(index),
+                  onRemoveTopping: (itemIndex, toppingIndex) {
+                    final item = orderItems[itemIndex];
+                    final newToppings = [...item.toppings!]
+                      ..removeAt(toppingIndex);
+                    final updated = item.copyWith(toppings: newToppings);
+                    final updatedItems = [...orderItems];
+                    updatedItems[itemIndex] = updated;
+                    ref.read(orderProvider.notifier).updateItems(updatedItems);
+                  },
+                  onRemoveExtra: (itemIndex, extraIndex) {
+                    final item = orderItems[itemIndex];
+                    final newExtras = [...item.extras!]..removeAt(extraIndex);
+                    final updated = item.copyWith(extras: newExtras);
+                    final updatedItems = [...orderItems];
+                    updatedItems[itemIndex] = updated;
+                    ref.read(orderProvider.notifier).updateItems(updatedItems);
+                  },
                 ),
-              ],
-            );
-           
-          
+              ),
+            ],
+          );
         },
       ),
     );

@@ -330,7 +330,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
               children: [
                 // LEFT PANEL
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: OrderLeftPanel(
                     onAddToOrder: _addCurrentItemToOrder,
                     onAddExtra: _openExtraDialog,

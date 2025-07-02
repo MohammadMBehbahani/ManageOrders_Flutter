@@ -137,6 +137,13 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => OrderScreen(orderToEdit: order)));
+    setState(() {
+      toDate = null;
+      fromDate = null;
+      selectedOrder = null;
+    });
+    final notifier = ref.read(submittedOrdersProvider.notifier);
+    notifier.refreshOrders();
   }
 
   void _showErrorDialog(BuildContext context, String message) {
@@ -273,8 +280,15 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                             onTap: () => setState(() => selectedOrder = order),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async =>
-                                  await notifier.deleteOrder(order.id),
+                              onPressed: () async {
+                                await notifier.deleteOrder(order.id);
+                                setState(() {
+                                  toDate = null;
+                                  fromDate = null;
+                                  selectedOrder = null;
+                                });
+                                notifier.refreshOrders();
+                              },
                             ),
                           );
                         },

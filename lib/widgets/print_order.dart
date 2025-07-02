@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/providers/category_provider.dart';
+import 'package:manageorders/providers/shop_details_provider.dart';
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -19,12 +20,15 @@ class PrintOrderWidget extends ConsumerWidget {
 
   const PrintOrderWidget({super.key, required this.order});
 
-
   Future<Uint8List> generatePdf(
+    WidgetRef ref,
     Order order,
     List<Product> products,
-    List<Category> categories,
-     [PdfPageFormat? format]) async {
+    List<Category> categories, [
+    PdfPageFormat? format,
+  ]) async {
+    final shopDetailsAsync = ref.watch(shopDetailsProvider);
+
     final pageFormat = PdfPageFormat(
       227, // width in points (80 mm ≈ 3.15 inch * 72)
       400, // height in points (change based on receipt length, or set large for scroll)
@@ -62,13 +66,20 @@ class PrintOrderWidget extends ConsumerWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Center(child: pw.Text('Caspian')),
+              pw.Center(child: pw.Text(shopDetailsAsync?.shopName != null ? shopDetailsAsync!.shopName: '')),
               pw.SizedBox(height: 4),
-              pw.Text('123 Main Street'),
-              pw.Text('Suite 4B'),
-              pw.Text('Business Park'),
-              pw.Text('AB12 3CD Countyshire'),
-              pw.Text('01234 567890'),
+              pw.Text(shopDetailsAsync?.address1 != null ? shopDetailsAsync!.address1: ''),
+              pw.Text(shopDetailsAsync?.address2 != null ? shopDetailsAsync!.address2: ''),
+              pw.Text(shopDetailsAsync?.address3 != null ? shopDetailsAsync!.address3: ''),
+              pw.Row(
+                
+                children: [
+                  pw.Text(shopDetailsAsync?.address4 != null ? shopDetailsAsync!.address4: ''),
+                  pw.SizedBox(width: 10),
+                  pw.Text(shopDetailsAsync?.postcode != null ? shopDetailsAsync!.postcode: '')
+                ]
+                ),
+              pw.Text(shopDetailsAsync?.phone != null ? shopDetailsAsync!.phone: ''),
               pw.SizedBox(height: 12),
               pw.Text('Order Number: $shortOrderId'),
               pw.SizedBox(height: 8),
@@ -77,10 +88,17 @@ class PrintOrderWidget extends ConsumerWidget {
                 final productName =
                     products.firstWhereOrNull((p) => p.id == entry.key)?.name ??
                     '';
-                    
-                final categoryName = 
-                  categories.firstWhereOrNull((p) => p.id == products
-                          .firstWhereOrNull((p) => p.id == entry.key)?.categoryId)?.name ??
+
+                final categoryName =
+                    categories
+                        .firstWhereOrNull(
+                          (p) =>
+                              p.id ==
+                              products
+                                  .firstWhereOrNull((p) => p.id == entry.key)
+                                  ?.categoryId,
+                        )
+                        ?.name ??
                     '';
 
                 return [
@@ -191,10 +209,11 @@ class PrintOrderWidget extends ConsumerWidget {
 
     return productsAsync.when(
       data: (products) {
-       return categoryAsync.when(
+        return categoryAsync.when(
           data: (categories) {
             return PdfPreview(
-              build: (format) => generatePdf(order, products, categories, format),
+              build: (format) =>
+                  generatePdf(ref, order, products, categories, format),
               canChangePageFormat: false,
               allowPrinting: true,
               allowSharing: false,

@@ -9,6 +9,7 @@ import 'package:manageorders/srcreen/management/management_screen.dart';
 import 'package:manageorders/srcreen/order/order_list_screen.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/product/product_screen.dart';
+import 'package:manageorders/srcreen/shope_details_screen.dart';
 import 'package:manageorders/srcreen/topping_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -42,6 +43,7 @@ class ManageOrdersApp extends StatelessWidget {
         '/order_screen': (context) => const OrderScreen(),
         '/order_list_screen': (context) => const SubmittedOrdersScreen(),
         '/management_screen': (context) => const ManagementScreen(),
+        '/shope_detail_screen': (context) => const ShopDetailsScreen()
       },
     );
   }

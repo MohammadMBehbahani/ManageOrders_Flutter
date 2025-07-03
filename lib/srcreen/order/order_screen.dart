@@ -204,13 +204,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           builder: (_) => CashPaymentScreen(
             totalAmount: total,
             isPrintChecked: isPrintChecked,
-            onSubmit: () async =>
-              await ref
-                  .read(orderProvider.notifier)
-                  .submitOrder(
-                    paymentMethod: paymentMethod,
-                    discount: selectedDiscount,
-                  )
+            onSubmit: () async => await ref
+                .read(orderProvider.notifier)
+                .submitOrder(
+                  paymentMethod: paymentMethod,
+                  discount: selectedDiscount,
+                ),
           ),
         ),
       );
@@ -335,7 +334,14 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Order')),
+      backgroundColor: Color(0xFF1A1E24),
+      appBar: AppBar(
+        title: const Text(
+          'Create Order',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xFF1A1E24),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Row(
@@ -365,41 +371,50 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
               // RIGHT PANEL (Order summary)
               Expanded(
                 flex: 2,
-                child: OrderRightPanel(
-                  onquantityInc: (index) =>
-                      ref.read(orderProvider.notifier).increaseQuantity(index),
-                  onquantityDec: (index) =>
-                      ref.read(orderProvider.notifier).decreaseQuantity(index),
-                  orderItems: orderItems,
-                  onAddItem: _addSimpleItem,
-                  selectedDiscount: selectedDiscount,
-                  finalTotal: finalTotal,
-                  isPrintChecked: isPrintChecked,
-                  onPrintToggle: (value) =>
-                      setState(() => isPrintChecked = value ?? false),
-                  onAddDiscount: _openDiscountDialog,
-                  onRemoveDiscount: onRemoveDiscount,
-                  onSubmitCash: () async => await _submitOrder('cash'),
-                  onSubmitCard: () async => _submitOrder('card'),
-                  onRemoveItem: (index) =>
-                      ref.read(orderProvider.notifier).removeItem(index),
-                  onRemoveTopping: (itemIndex, toppingIndex) {
-                    final item = orderItems[itemIndex];
-                    final newToppings = [...item.toppings!]
-                      ..removeAt(toppingIndex);
-                    final updated = item.copyWith(toppings: newToppings);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
-                  onRemoveExtra: (itemIndex, extraIndex) {
-                    final item = orderItems[itemIndex];
-                    final newExtras = [...item.extras!]..removeAt(extraIndex);
-                    final updated = item.copyWith(extras: newExtras);
-                    final updatedItems = [...orderItems];
-                    updatedItems[itemIndex] = updated;
-                    ref.read(orderProvider.notifier).updateItems(updatedItems);
-                  },
+                child: Container(
+                  color: Colors.white,
+                  child: OrderRightPanel(
+                    onquantityInc: (index) => ref
+                        .read(orderProvider.notifier)
+                        .increaseQuantity(index),
+                    onquantityDec: (index) => ref
+                        .read(orderProvider.notifier)
+                        .decreaseQuantity(index),
+                    orderItems: orderItems,
+                    onAddItem: _addSimpleItem,
+                    selectedDiscount: selectedDiscount,
+                    finalTotal: finalTotal,
+                    isPrintChecked: isPrintChecked,
+                    onPrintToggle: (value) =>
+                        setState(() => isPrintChecked = value ?? false),
+                    onAddDiscount: _openDiscountDialog,
+                    onRemoveDiscount: onRemoveDiscount,
+                    onSubmitCash: () async => await _submitOrder('cash'),
+                    onSubmitCard: () async => _submitOrder('card'),
+                    onRemoveItem: (index) =>
+                        ref.read(orderProvider.notifier).removeItem(index),
+                    onRemoveTopping: (itemIndex, toppingIndex) {
+                      final item = orderItems[itemIndex];
+                      final newToppings = [...item.toppings!]
+                        ..removeAt(toppingIndex);
+                      final updated = item.copyWith(toppings: newToppings);
+                      final updatedItems = [...orderItems];
+                      updatedItems[itemIndex] = updated;
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
+                    },
+                    onRemoveExtra: (itemIndex, extraIndex) {
+                      final item = orderItems[itemIndex];
+                      final newExtras = [...item.extras!]..removeAt(extraIndex);
+                      final updated = item.copyWith(extras: newExtras);
+                      final updatedItems = [...orderItems];
+                      updatedItems[itemIndex] = updated;
+                      ref
+                          .read(orderProvider.notifier)
+                          .updateItems(updatedItems);
+                    },
+                  ),
                 ),
               ),
             ],

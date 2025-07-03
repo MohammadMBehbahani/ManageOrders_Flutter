@@ -101,9 +101,11 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                           phone: _controllers[6].text,
                         );
                     if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved successfully')),
-                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Saved successfully')),
+                      );
+                    }
                   }
                 },
                 child: const Text('Save'),

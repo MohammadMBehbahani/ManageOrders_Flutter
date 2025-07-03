@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/providers/product_provider.dart';
-import 'package:collection/collection.dart';
 
 class PrintOrderWidget extends ConsumerWidget {
   final Order order;
@@ -66,104 +65,149 @@ class PrintOrderWidget extends ConsumerWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Center(child: pw.Text(shopDetailsAsync?.shopName != null ? shopDetailsAsync!.shopName: '')),
-              pw.SizedBox(height: 4),
-              pw.Text(shopDetailsAsync?.address1 != null ? shopDetailsAsync!.address1: ''),
-              pw.Text(shopDetailsAsync?.address2 != null ? shopDetailsAsync!.address2: ''),
-              pw.Text(shopDetailsAsync?.address3 != null ? shopDetailsAsync!.address3: ''),
-              pw.Row(
-                
-                children: [
-                  pw.Text(shopDetailsAsync?.address4 != null ? shopDetailsAsync!.address4: ''),
-                  pw.SizedBox(width: 10),
-                  pw.Text(shopDetailsAsync?.postcode != null ? shopDetailsAsync!.postcode: '')
-                ]
+              pw.Center(
+                child: pw.Text(
+                  shopDetailsAsync?.shopName != null
+                      ? shopDetailsAsync!.shopName
+                      : '',
                 ),
-              pw.Text(shopDetailsAsync?.phone != null ? shopDetailsAsync!.phone: ''),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                shopDetailsAsync?.address1 != null
+                    ? shopDetailsAsync!.address1
+                    : '',
+              ),
+              pw.Text(
+                shopDetailsAsync?.address2 != null
+                    ? shopDetailsAsync!.address2
+                    : '',
+              ),
+              pw.Text(
+                shopDetailsAsync?.address3 != null
+                    ? shopDetailsAsync!.address3
+                    : '',
+              ),
+              pw.Row(
+                children: [
+                  pw.Text(
+                    shopDetailsAsync?.address4 != null
+                        ? shopDetailsAsync!.address4
+                        : '',
+                  ),
+                  pw.SizedBox(width: 10),
+                  pw.Text(
+                    shopDetailsAsync?.postcode != null
+                        ? shopDetailsAsync!.postcode
+                        : '',
+                  ),
+                ],
+              ),
+              pw.Text(
+                shopDetailsAsync?.phone != null ? shopDetailsAsync!.phone : '',
+              ),
               pw.SizedBox(height: 12),
               pw.Text('Order Number: $shortOrderId'),
               pw.SizedBox(height: 8),
-              ...grouped.entries.expand((entry) {
-                final items = entry.value;
-                final productName =
-                    products.firstWhereOrNull((p) => p.id == entry.key)?.name ??
-                    '';
+              ...categories.map((category) {
+                final categoryProducts = products.where(
+                  (p) => p.categoryId == category.id,
+                );
+                final itemsInCategory = order.items.where(
+                  (item) =>
+                      categoryProducts.any((p) => p.id == item.product.id),
+                );
+                if (itemsInCategory.isEmpty) {
+                  return pw.SizedBox(); // skip empty categories
+                }
 
-                final categoryName =
-                    categories
-                        .firstWhereOrNull(
-                          (p) =>
-                              p.id ==
-                              products
-                                  .firstWhereOrNull((p) => p.id == entry.key)
-                                  ?.categoryId,
-                        )
-                        ?.name ??
-                    '';
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      category.name,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.SizedBox(height: 4),
+                    ...categoryProducts.map((product) {
+                      final productItems = order.items
+                          .where((item) => item.product.id == product.id)
+                          .toList();
 
-                return [
-                  pw.Text(categoryName),
-                  pw.Text(productName),
-                  ...items.map((item) {
-                    return pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                          children: [
-                            pw.Text(
-                              '${item.quantity} x ${item.subProductName}',
-                            ),
-                            pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
-                            pw.SizedBox(height: 8),
-                          ],
-                        ),
-                        if (item.extras != null && item.extras!.isNotEmpty)
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: item.extras!.map((extra) {
-                                return pw.Text(
-                                  '+ Extra: ${extra.title} (£${extra.amount.toStringAsFixed(2)})',
-                                  style: const pw.TextStyle(fontSize: 9),
-                                );
-                              }).toList(),
-                            ),
+                      if (productItems.isEmpty) return pw.SizedBox();
+
+                      return pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            product.name,
+                            style: pw.TextStyle(fontSize: 11),
                           ),
-                        if (item.toppings != null && item.toppings!.isNotEmpty)
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(left: 12, top: 2),
-                            child: pw.Column(
+                          ...productItems.map((item) {
+                            return pw.Column(
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: item.toppings!.map((topping) {
-                                return pw.Text(
-                                  '+ Topping: ${topping.name} (£${topping.price.toStringAsFixed(2)})',
-                                  style: const pw.TextStyle(fontSize: 9),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                      ],
-                    );
-                  }),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text('Total:'),
-                      pw.Text(
-                        '£${items.fold(0.0, (sum, item) {
-                          final extrasTotal = item.extras?.fold(0.0, (eSum, e) => eSum + e.amount) ?? 0.0;
-                          final toppingsTotal = item.toppings?.fold(0.0, (tSum, t) => tSum + t.price) ?? 0.0;
-                          final totalPerItem = (item.unitPrice + extrasTotal + toppingsTotal) * item.quantity;
-                          return sum + totalPerItem;
-                        }).toStringAsFixed(2)}',
-                      ),
-                      pw.SizedBox(height: 8),
-                    ],
-                  ),
-                  pw.Divider(),
-                ];
+                              children: [
+                                pw.Row(
+                                  mainAxisAlignment:
+                                      pw.MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    pw.Text(
+                                      '${item.quantity} x ${item.subProductName}',
+                                    ),
+                                    pw.Text(
+                                      '£${item.unitPrice.toStringAsFixed(2)}',
+                                    ),
+                                  ],
+                                ),
+                                if (item.extras?.isNotEmpty ?? false)
+                                  pw.Padding(
+                                    padding: const pw.EdgeInsets.only(
+                                      left: 12,
+                                      top: 2,
+                                    ),
+                                    child: pw.Column(
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.start,
+                                      children: item.extras!.map((extra) {
+                                        return pw.Text(
+                                          '+ Extra: ${extra.title} (£${extra.amount.toStringAsFixed(2)})',
+                                          style: const pw.TextStyle(
+                                            fontSize: 9,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                if (item.toppings?.isNotEmpty ?? false)
+                                  pw.Padding(
+                                    padding: const pw.EdgeInsets.only(
+                                      left: 12,
+                                      top: 2,
+                                    ),
+                                    child: pw.Column(
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.start,
+                                      children: item.toppings!.map((topping) {
+                                        return pw.Text(
+                                          '+ Topping: ${topping.name} (£${topping.price.toStringAsFixed(2)})',
+                                          style: const pw.TextStyle(
+                                            fontSize: 9,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                pw.SizedBox(height: 6),
+                              ],
+                            );
+                          }),
+                        ],
+                      );
+                    }),
+                    pw.Divider(), // 👈 this now separates the **category**
+                  ],
+                );
+                
               }),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,

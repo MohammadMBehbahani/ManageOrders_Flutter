@@ -220,9 +220,8 @@ class OrderLeftPanel extends StatelessWidget {
                       if (selectedExtras.isNotEmpty) ...[
                         const Text(
                           'Extras:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
                         SizedBox(
                           height: maxPadHeight.clamp(
                             minPadHeight,
@@ -255,15 +254,13 @@ class OrderLeftPanel extends StatelessWidget {
                         ),
                       ],
 
-                      const SizedBox(width: 16),
 
                       // Selected Toppings
                       if (selectedToppings.isNotEmpty) ...[
                         const Text(
                           'Toppings:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
                         SizedBox(
                           height: maxPadHeight.clamp(
                             minPadHeight,

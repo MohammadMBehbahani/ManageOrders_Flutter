@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/main.dart';
 import 'package:manageorders/models/order.dart';
+import 'package:manageorders/providers/category_provider.dart';
+import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
 import 'package:manageorders/widgets/print_all_orders.dart';
 import 'package:manageorders/widgets/print_order.dart';
+import 'package:printing/printing.dart';
 
 class SubmittedOrdersScreen extends ConsumerStatefulWidget {
   const SubmittedOrdersScreen({super.key});
@@ -162,6 +165,45 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     );
   }
 
+  Future<void> printOrderSilently(
+    Order order,
+  ) async {
+    final products = await ref.read(productProvider.future);
+    final categories = await ref.read(categoryProvider.future);
+
+    try {
+      final pdfData = await PrintOrderWidget(order: order).generatePdf(
+        ref,
+        order,
+        products,
+        categories,
+      );
+
+      // 🖨️ Get list of available printers
+      final printers = await Printing.listPrinters();
+
+      // ❓ Pick the first printer (or pick a named one)
+      final printer = printers.firstWhere(
+        (p) => p.name.toLowerCase().contains("zj-80"), // optional filter
+        orElse: () => printers.first,
+      );
+
+      // ✅ Print directly to that printer
+      await Printing.directPrintPdf(
+        printer: printer,
+        onLayout: (_) async => pdfData,
+        name: 'Order_${order.id}',
+      );
+    } catch (e) {
+      if(!mounted) return;
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('❌ Printing failed: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ordersAsync = ref.watch(submittedOrdersProvider);
@@ -183,6 +225,11 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                       ? () => _printOrder(selectedOrder!)
                       : null,
                   child: const Text('Print Selected'),
+                ),
+                 const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () async => printOrderSilently(selectedOrder!),
+                  child: const Text('Print Direct'),
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(

@@ -53,72 +53,95 @@ class OrderRightPanel extends StatelessWidget {
                 itemBuilder: (_, i) {
                   final item = orderItems[i];
                   return Card(
-                    child: ExpansionTile(
-                      title: Text(
-                        '${item.product.name} - ${item.subProductName} x${item.quantity}',
-                      ),
-                      subtitle: Text('£${item.totalPrice.toStringAsFixed(2)}'),
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove, color: Colors.red),
-                              onPressed: () => onquantityDec(i),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add, color: Colors.green),
-                              onPressed: () => onquantityInc(i),
-                            ),
-                          ],
-                        ),
-
-                        if (item.toppings != null && item.toppings!.isNotEmpty)
-                          ...List.generate(item.toppings!.length, (tIndex) {
-                            final t = item.toppings![tIndex];
-                            return ListTile(
-                              title: Text(
-                                'Topping: ${t.name} (£${t.price.toStringAsFixed(2)})',
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${item.product.name} - ${item.subProductName} x${item.quantity}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              trailing: IconButton(
+                              IconButton(
                                 icon: const Icon(
-                                  Icons.delete,
+                                  Icons.delete_forever,
                                   color: Colors.red,
                                 ),
-                                onPressed: () => onRemoveTopping(i, tIndex),
+                                onPressed: () => onRemoveItem(i),
                               ),
-                            );
-                          }),
-                        if (item.extras != null && item.extras!.isNotEmpty)
-                          ...List.generate(item.extras!.length, (eIndex) {
-                            final e = item.extras![eIndex];
-                            return ListTile(
-                              title: Text(
-                                'Extra: ${e.title} (£${e.amount.toStringAsFixed(2)})',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onRemoveExtra(i, eIndex),
-                              ),
-                            );
-                          }),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_forever,
-                            color: Colors.red,
+                            ],
                           ),
-                          onPressed: () => onRemoveItem(i),
-                        ),
-                      ],
+
+                          const SizedBox(height: 4),
+
+                          Row(
+                            children: [
+                              Text('£${item.totalPrice.toStringAsFixed(2)}'),
+                              const SizedBox(width: 100),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.remove,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => onquantityDec(i),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.green,
+                                ),
+                                onPressed: () => onquantityInc(i),
+                              ),
+                            ],
+                          ),
+
+                          if (item.toppings != null &&
+                              item.toppings!.isNotEmpty)
+                            ...List.generate(item.toppings!.length, (tIndex) {
+                              final t = item.toppings![tIndex];
+                              return ListTile(
+                                title: Text(
+                                  'Topping: ${t.name} (£${t.price.toStringAsFixed(2)})',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => onRemoveTopping(i, tIndex),
+                                ),
+                              );
+                            }),
+                          if (item.extras != null && item.extras!.isNotEmpty)
+                            ...List.generate(item.extras!.length, (eIndex) {
+                              final e = item.extras![eIndex];
+                              return ListTile(
+                                title: Text(
+                                  'Extra: ${e.title} (£${e.amount.toStringAsFixed(2)})',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => onRemoveExtra(i, eIndex),
+                                ),
+                              );
+                            }),
+                        ],
+                      ),
                     ),
                   );
                 },
               ),
             ),
           ),
-
+          const Divider(thickness: 10),
           if (selectedDiscount != null)
             Padding(
               padding: const EdgeInsets.all(8),
@@ -157,7 +180,10 @@ class OrderRightPanel extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 2,
+                  ),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
                 icon: const Icon(Icons.percent, size: 18),
@@ -168,7 +194,10 @@ class OrderRightPanel extends StatelessWidget {
 
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 2,
+                  ),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
                 icon: const Icon(Icons.add_circle, size: 18),

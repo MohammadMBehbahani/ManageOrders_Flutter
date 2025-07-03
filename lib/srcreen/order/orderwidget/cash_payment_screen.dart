@@ -2,18 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:manageorders/widgets/number_pad.dart';
-import 'package:manageorders/widgets/print_order.dart';
 import 'package:manageorders/models/order.dart'; // if you have it
 
 class CashPaymentScreen extends StatefulWidget {
   final double totalAmount;
-  final bool isPrintChecked;
   final Future<Order> Function() onSubmit;
 
   const CashPaymentScreen({
     super.key,
     required this.totalAmount,
-    required this.isPrintChecked,
     required this.onSubmit,
   });
 
@@ -38,19 +35,20 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
       }
     });
   }
+
   Future<void> openCashDrawer() async {
     try {
       final result = await Process.run('OpenDrawer.exe', []);
 
       if (result.exitCode == 0) {
-       // print('✅ Drawer opened: ${result.stdout}');
+        // print('✅ Drawer opened: ${result.stdout}');
       } else {
         if (!mounted) return;
-      //  _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
+        //  _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
       }
     } catch (e) {
       if (!mounted) return;
-     // _showErrorDialog(context, 'Exception occurred:\n$e');
+      // _showErrorDialog(context, 'Exception occurred:\n$e');
     }
   }
   //  void _showErrorDialog(BuildContext context, String message) {
@@ -69,21 +67,20 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
   //   );
   // }
 
-
   Future<void> _handleSubmit() async {
     final cash = double.tryParse(givenCash);
-    final order = await widget.onSubmit();
 
     await openCashDrawer();
 
     if (!mounted) return;
 
     if (cash != null && cash >= widget.totalAmount) {
+      final order = await widget.onSubmit(); // ✅ call submit
       final change = (cash - widget.totalAmount).toStringAsFixed(2);
       setState(() {
         returnAmount = double.parse(change);
       });
-
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -93,39 +90,15 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // close change dialog
-                Navigator.of(context).pop(); // close cash screen
-                if (widget.isPrintChecked) {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      content: SizedBox(
-                        width: 500,
-                        height: 600,
-                        child: PrintOrderWidget(order: order),
-                      ),
-                    ),
-                  );
-                }
+                Navigator.of(context).pop(order);
               },
               child: const Text("OK"),
-            )
+            ),
           ],
         ),
       );
     } else {
       Navigator.of(context).pop();
-      if (widget.isPrintChecked) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            content: SizedBox(
-              width: 500,
-              height: 600,
-              child: PrintOrderWidget(order: order),
-            ),
-          ),
-        );
-      }
     }
   }
 
@@ -137,14 +110,22 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text("Total: £${widget.totalAmount.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 24)),
+            Text(
+              "Total: £${widget.totalAmount.toStringAsFixed(2)}",
+              style: const TextStyle(fontSize: 24),
+            ),
             const SizedBox(height: 12),
-            Text("Given Cash: £$givenCash", style: const TextStyle(fontSize: 20)),
+            Text(
+              "Given Cash: £$givenCash",
+              style: const TextStyle(fontSize: 20),
+            ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _handleSubmit,
-              child: const Text('Submit Payment', style: TextStyle(fontSize: 50, color: Colors.green),),
+              child: const Text(
+                'Submit Payment',
+                style: TextStyle(fontSize: 50, color: Colors.green),
+              ),
             ),
             const SizedBox(height: 12),
             Expanded(child: NumberPad(onKeyTap: _onKeyTap)),

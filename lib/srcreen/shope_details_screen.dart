@@ -18,10 +18,8 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
   void initState() {
     super.initState();
 
-    // Load the shop details from database
     Future.microtask(() async {
-      await ref.read(shopDetailsProvider.notifier).loadShopDetails();
-      final details = ref.read(shopDetailsProvider);
+      final details = await ref.read(shopDetailsProvider.future);
       if (details != null) {
         _controllers[0].text = details.shopName;
         _controllers[1].text = details.address1;

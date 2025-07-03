@@ -1,17 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/database/shop_details_database.dart';
 import 'package:manageorders/models/shop_details.dart';
 
-final shopDetailsProvider = NotifierProvider<ShopDetailsNotifier, ShopDetails?>(
+final shopDetailsProvider =
+    AsyncNotifierProvider<ShopDetailsNotifier, ShopDetails?>(
   ShopDetailsNotifier.new,
 );
 
-class ShopDetailsNotifier extends Notifier<ShopDetails?> {
+class ShopDetailsNotifier extends AsyncNotifier<ShopDetails?> {
   @override
-  ShopDetails? build() => null;
-
-  Future<void> loadShopDetails() async {
-    state = await ShopDetailsDatabase.load();
+  FutureOr<ShopDetails?> build() async {
+    return await ShopDetailsDatabase.load(); // Now loads on first use
   }
 
   Future<void> saveShopDetails({
@@ -32,7 +33,8 @@ class ShopDetailsNotifier extends Notifier<ShopDetails?> {
       postcode: postcode,
       phone: phone,
     );
+
     await ShopDetailsDatabase.save(details);
-    state = details;
+    state = AsyncValue.data(details); // Update state
   }
 }

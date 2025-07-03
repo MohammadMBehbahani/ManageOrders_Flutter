@@ -90,17 +90,8 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     }
   }
 
-  void _printOrder(Order order) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        content: SizedBox(
-          width: 500,
-          height: 600,
-          child: PrintOrderWidget(order: order),
-        ),
-      ),
-    );
+  void _printOrder(Order order) async {
+    await printOrderSilently(order);
   }
 
   void _printAll() async {
@@ -165,19 +156,14 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     );
   }
 
-  Future<void> printOrderSilently(
-    Order order,
-  ) async {
+  Future<void> printOrderSilently(Order order) async {
     final products = await ref.read(productProvider.future);
     final categories = await ref.read(categoryProvider.future);
 
     try {
-      final pdfData = await PrintOrderWidget(order: order).generatePdf(
-        ref,
-        order,
-        products,
-        categories,
-      );
+      final pdfData = await PrintOrderWidget(
+        order: order,
+      ).generatePdf(ref, order, products, categories);
 
       // 🖨️ Get list of available printers
       final printers = await Printing.listPrinters();
@@ -195,11 +181,18 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
         name: 'Order_${order.id}',
       );
     } catch (e) {
-      if(!mounted) return;
+      if (!mounted) return;
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('❌ Printing failed: $e')));
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            content: SizedBox(
+              width: 500,
+              height: 600,
+              child: PrintOrderWidget(order: order),
+            ),
+          ),
+        );
       }
     }
   }
@@ -226,11 +219,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                       : null,
                   child: const Text('Print Selected'),
                 ),
-                 const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () async => printOrderSilently(selectedOrder!),
-                  child: const Text('Print Direct'),
-                ),
+
                 const SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: selectedOrder != null

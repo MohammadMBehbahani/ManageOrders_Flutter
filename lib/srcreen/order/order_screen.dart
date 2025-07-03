@@ -22,6 +22,7 @@ import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart'
 import 'package:manageorders/srcreen/order/orderwidget/sub_product_widget.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
 import 'package:manageorders/widgets/print_order.dart';
+import 'package:printing/printing.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -191,21 +192,19 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 
   Future<void> _submitOrder(String paymentMethod) async {
+    final order = ref
+        .read(orderProvider.notifier)
+        .getDraftOrder(
+          discount: selectedDiscount,
+          paymentMethod: paymentMethod,
+        );
     if (paymentMethod == 'cash') {
-      final order = ref
-          .read(orderProvider.notifier)
-          .getDraftOrder(
-            discount: selectedDiscount,
-            paymentMethod: paymentMethod,
-          );
       final total = order.finalTotal;
-
-      Navigator.of(context).push(
+      final orderee = await Navigator.of(context).push<Order>(
         MaterialPageRoute(
           builder: (_) => CashPaymentScreen(
             totalAmount: total,
-            isPrintChecked: isPrintChecked,
-            onSubmit: () async => await ref
+            onSubmit: () => ref
                 .read(orderProvider.notifier)
                 .submitOrder(
                   paymentMethod: paymentMethod,
@@ -214,15 +213,57 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           ),
         ),
       );
-    } else {
-      final order = await ref
-          .read(orderProvider.notifier)
-          .submitOrder(
-            paymentMethod: paymentMethod,
-            discount: selectedDiscount,
-          );
-      if (isPrintChecked) {
-        if (!mounted) return;
+
+      if (orderee != null && isPrintChecked) {
+        await printOrderSilently(order);
+      }
+      return;
+    }
+    await ref
+        .read(orderProvider.notifier)
+        .submitOrder(paymentMethod: paymentMethod, discount: selectedDiscount);
+    if (isPrintChecked) {
+      if (!mounted) return;
+      await printOrderSilently(order);
+    }
+
+    if (editingOrder != null) {
+      final notifier = ref.read(submittedOrdersProvider.notifier);
+      await notifier.deleteOrder(editingOrder!.id);
+    }
+    setState(() {
+      selectedDiscount = null;
+      isPrintChecked = false;
+    });
+  }
+
+  Future<void> printOrderSilently(Order order) async {
+    final products = await ref.read(productProvider.future);
+    final categories = await ref.read(categoryProvider.future);
+
+    try {
+      final pdfData = await PrintOrderWidget(
+        order: order,
+      ).generatePdf(ref, order, products, categories);
+
+      // 🖨️ Get list of available printers
+      final printers = await Printing.listPrinters();
+
+      // ❓ Pick the first printer (or pick a named one)
+      final printer = printers.firstWhere(
+        (p) => p.name.toLowerCase().contains("zj-80"), // optional filter
+        orElse: () => printers.first,
+      );
+
+      // ✅ Print directly to that printer
+      await Printing.directPrintPdf(
+        printer: printer,
+        onLayout: (_) async => pdfData,
+        name: 'Order_${order.id}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      if (context.mounted) {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -235,15 +276,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         );
       }
     }
-
-    if (editingOrder != null) {
-      final notifier = ref.read(submittedOrdersProvider.notifier);
-      await notifier.deleteOrder(editingOrder!.id);
-    }
-    setState(() {
-      selectedDiscount = null;
-      isPrintChecked = false;
-    });
   }
 
   void onCategorySelect(String categoryId) {

@@ -26,7 +26,7 @@ class PrintOrderWidget extends ConsumerWidget {
     List<Category> categories, [
     PdfPageFormat? format,
   ]) async {
-    final shopDetailsAsync = ref.watch(shopDetailsProvider);
+    final shopDetailsAsync = await ref.watch(shopDetailsProvider.future);
 
     final pageFormat = PdfPageFormat(
       227, // width in points (80 mm ≈ 3.15 inch * 72)

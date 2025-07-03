@@ -115,7 +115,7 @@ class OrderLeftPanel extends StatelessWidget {
           ),
           const Divider(),
           SizedBox(
-            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.40)),
+            height: maxPadHeight.clamp(minPadHeight, (maxPadHeight * 0.6)),
             width: maxPadwidth.clamp(minPadwidth, maxPadwidth),
             child: ScrollWithTouch(
               child: SingleChildScrollView(

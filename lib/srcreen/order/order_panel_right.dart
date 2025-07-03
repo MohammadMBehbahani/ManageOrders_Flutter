@@ -58,23 +58,12 @@ class OrderRightPanel extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${item.product.name} - ${item.subProductName} x${item.quantity}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_forever,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onRemoveItem(i),
-                              ),
-                            ],
+                          Text(
+                            '${item.product.name} - ${item.subProductName} x${item.quantity}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            softWrap: true, // Enables wrapping
+                            overflow: TextOverflow
+                                .visible, // Or ellipsis if you want "..."
                           ),
 
                           const SizedBox(height: 4),
@@ -82,7 +71,6 @@ class OrderRightPanel extends StatelessWidget {
                           Row(
                             children: [
                               Text('£${item.totalPrice.toStringAsFixed(2)}'),
-                              const SizedBox(width: 100),
                               IconButton(
                                 icon: const Icon(
                                   Icons.remove,
@@ -96,6 +84,13 @@ class OrderRightPanel extends StatelessWidget {
                                   color: Colors.green,
                                 ),
                                 onPressed: () => onquantityInc(i),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_forever,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => onRemoveItem(i),
                               ),
                             ],
                           ),

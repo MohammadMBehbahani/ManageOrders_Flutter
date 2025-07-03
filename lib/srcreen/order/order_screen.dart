@@ -19,6 +19,7 @@ import 'package:manageorders/srcreen/order/orderwidget/add_item_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/cash_payment_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/discount_select_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart';
+import 'package:manageorders/srcreen/order/orderwidget/sub_product_widget.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
 import 'package:manageorders/widgets/print_order.dart';
 import 'package:uuid/uuid.dart';
@@ -255,7 +256,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     });
   }
 
-  void onProductSelect(Product product) {
+  void onProductSelect(Product product) async {
     setState(() {
       selectedProduct = product;
       selectedSubProduct = null;
@@ -263,7 +264,41 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       selectedToppings = [];
     });
 
-    _addCurrentItemToOrder();
+    // Delay just a tick to ensure UI updates (optional safety)
+    await Future.delayed(Duration.zero);
+
+    if (product.availableSubProducts.isNotEmpty) {
+      List<SubProductOption> sortedSubProducts = [];
+      if (selectedProduct != null) {
+        sortedSubProducts = [...selectedProduct!.availableSubProducts]
+          ..sort((a, b) {
+            if (a.priority == null && b.priority == null) return 0;
+            if (a.priority == null) return 1;
+            if (b.priority == null) return -1;
+            return a.priority!.compareTo(b.priority!);
+          });
+      }
+
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SubProductExtrasScreen(
+            subProducts: sortedSubProducts,
+            selectedSubProduct: selectedSubProduct,
+            selectedExtras: selectedExtras,
+            selectedToppings: selectedToppings,
+            onSubProductSelect: onSubProductSelect,
+            onAddExtra: _openExtraDialog,
+            onAddTopping: _openToppingDialog,
+            onRemoveExtra: onRemoveExtra,
+            onRemoveTopping: onRemoveTopping,
+          ),
+        ),
+      );
+    } else {
+      _addCurrentItemToOrder();
+    }
   }
 
   void onSubProductSelect(SubProductOption subProduct) {

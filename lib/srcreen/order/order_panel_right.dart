@@ -69,6 +69,7 @@ class OrderRightPanel extends StatelessWidget {
                           const SizedBox(height: 4),
 
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text('£${item.totalPrice.toStringAsFixed(2)}'),
                               IconButton(

@@ -200,7 +200,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         );
     if (paymentMethod == 'cash') {
       final total = order.finalTotal;
-      final orderee = await Navigator.of(context).push<Order>(
+      await Navigator.of(context).push<Order>(
         MaterialPageRoute(
           builder: (_) => CashPaymentScreen(
             totalAmount: total,
@@ -214,9 +214,13 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         ),
       );
 
-      if (orderee != null && isPrintChecked) {
+      if (isPrintChecked) {
         await printOrderSilently(order);
       }
+      setState(() {
+        selectedDiscount = null;
+        isPrintChecked = false;
+      });
       return;
     }
     await ref
@@ -226,11 +230,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       if (!mounted) return;
       await printOrderSilently(order);
     }
-
     if (editingOrder != null) {
       final notifier = ref.read(submittedOrdersProvider.notifier);
       await notifier.deleteOrder(editingOrder!.id);
     }
+
     setState(() {
       selectedDiscount = null;
       isPrintChecked = false;

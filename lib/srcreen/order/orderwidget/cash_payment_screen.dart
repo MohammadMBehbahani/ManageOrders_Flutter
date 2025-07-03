@@ -77,9 +77,8 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
     }
 
     if (!mounted) return;
-
-    if (cash != null && cash >= widget.totalAmount) {
-      final order = await widget.onSubmit(); // ✅ call submit
+    final order = await widget.onSubmit(); // ✅ call submit
+    if (cash != null && cash >= widget.totalAmount) { 
       final change = (cash - widget.totalAmount).toStringAsFixed(2);
       setState(() {
         returnAmount = double.parse(change);
@@ -102,6 +101,7 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
         ),
       );
     } else {
+      if (!mounted) return;
       Navigator.of(context).pop();
     }
   }

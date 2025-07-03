@@ -408,6 +408,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF1A1E24),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

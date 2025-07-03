@@ -70,7 +70,11 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
   Future<void> _handleSubmit() async {
     final cash = double.tryParse(givenCash);
 
-    await openCashDrawer();
+    try {
+      await openCashDrawer(); // Attempt to open drawer, ignore errors
+    } catch (e) {
+      debugPrint('⚠️ Failed to open drawer: $e'); // Log it or ignore silently
+    }
 
     if (!mounted) return;
 

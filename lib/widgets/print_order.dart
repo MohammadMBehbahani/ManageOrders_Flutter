@@ -148,12 +148,11 @@ class PrintOrderWidget extends ConsumerWidget {
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               children: [
                                 pw.Row(
-                                  mainAxisAlignment:
-                                      pw.MainAxisAlignment.spaceBetween,
                                   children: [
                                     pw.Text(
                                       '${item.quantity} x ${item.subProductName}',
                                     ),
+                                    pw.SizedBox(width: 50),
                                     pw.Text(
                                       '£${item.unitPrice.toStringAsFixed(2)}',
                                     ),

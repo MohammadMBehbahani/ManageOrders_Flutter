@@ -18,7 +18,7 @@ class NumberPad extends StatelessWidget {
     ];
 
     final screenHeight = MediaQuery.of(context).size;
-    final maxPadHeight = screenHeight.height * 0.58;
+    final maxPadHeight = screenHeight.height * 0.63;
     final minPadHeight  = screenHeight.height - ((screenHeight.height * 95) / 100);
 
     final maxPadwidth = screenHeight.width;
@@ -36,7 +36,7 @@ class NumberPad extends StatelessWidget {
                 children: row.map((val) {
                   if (val.isEmpty) {
                     return  SizedBox(
-                      width: maxPadwidth.clamp(minPadwidth, 120)
+                      width: maxPadwidth.clamp(minPadwidth, 110)
                     , height: maxPadHeight.clamp(minPadHeight, 75)
                     );
                   }
@@ -47,7 +47,7 @@ class NumberPad extends StatelessWidget {
                       onPressed: () => onKeyTap(val),
                       style: ElevatedButton.styleFrom(
                         minimumSize:  Size(
-                          maxPadwidth.clamp(minPadwidth, 120)
+                          maxPadwidth.clamp(minPadwidth, 110)
                           , maxPadHeight.clamp(minPadHeight, 75)
                           ),
                         shape: RoundedRectangleBorder(

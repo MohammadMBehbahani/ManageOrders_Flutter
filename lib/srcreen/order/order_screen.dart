@@ -22,6 +22,7 @@ import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart'
 import 'package:manageorders/srcreen/order/orderwidget/sub_product_widget.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
 import 'package:manageorders/widgets/print_order.dart';
+import 'package:manageorders/widgets/print_silently.dart';
 import 'package:printing/printing.dart';
 import 'package:uuid/uuid.dart';
 
@@ -215,7 +216,8 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       );
 
       if (isPrintChecked) {
-        await printOrderSilently(order);
+        if (!mounted) return;
+        await printOrderSilently(context: context, ref: ref, order: order);
       }
       setState(() {
         selectedDiscount = null;
@@ -228,7 +230,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         .submitOrder(paymentMethod: paymentMethod, discount: selectedDiscount);
     if (isPrintChecked) {
       if (!mounted) return;
-      await printOrderSilently(order);
+      await printOrderSilently(context: context, ref: ref, order: order);
     }
     if (editingOrder != null) {
       final notifier = ref.read(submittedOrdersProvider.notifier);
@@ -239,47 +241,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       selectedDiscount = null;
       isPrintChecked = false;
     });
-  }
-
-  Future<void> printOrderSilently(Order order) async {
-    final products = await ref.read(productProvider.future);
-    final categories = await ref.read(categoryProvider.future);
-
-    try {
-      final pdfData = await PrintOrderWidget(
-        order: order,
-      ).generatePdf(ref, order, products, categories);
-
-      // 🖨️ Get list of available printers
-      final printers = await Printing.listPrinters();
-
-      // ❓ Pick the first printer (or pick a named one)
-      final printer = printers.firstWhere(
-        (p) => p.name.toLowerCase().contains("zj-80"), // optional filter
-        orElse: () => printers.first,
-      );
-
-      // ✅ Print directly to that printer
-      await Printing.directPrintPdf(
-        printer: printer,
-        onLayout: (_) async => pdfData,
-        name: 'Order_${order.id}',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            content: SizedBox(
-              width: 500,
-              height: 600,
-              child: PrintOrderWidget(order: order),
-            ),
-          ),
-        );
-      }
-    }
   }
 
   void onCategorySelect(String categoryId) {

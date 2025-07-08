@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/main.dart';
 import 'package:manageorders/models/order.dart';
-import 'package:manageorders/providers/category_provider.dart';
-import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
 import 'package:manageorders/widgets/print_all_orders.dart';
-import 'package:manageorders/widgets/print_order.dart';
-import 'package:printing/printing.dart';
+import 'package:manageorders/widgets/print_silently.dart';
 
 class SubmittedOrdersScreen extends ConsumerStatefulWidget {
   const SubmittedOrdersScreen({super.key});
@@ -91,7 +88,8 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
   }
 
   void _printOrder(Order order) async {
-    await printOrderSilently(order);
+    if (!mounted) return;
+        await printOrderSilently(context: context, ref: ref, order: order);
   }
 
   void _printAll() async {
@@ -156,46 +154,6 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     );
   }
 
-  Future<void> printOrderSilently(Order order) async {
-    final products = await ref.read(productProvider.future);
-    final categories = await ref.read(categoryProvider.future);
-
-    try {
-      final pdfData = await PrintOrderWidget(
-        order: order,
-      ).generatePdf(ref, order, products, categories);
-
-      // 🖨️ Get list of available printers
-      final printers = await Printing.listPrinters();
-
-      // ❓ Pick the first printer (or pick a named one)
-      final printer = printers.firstWhere(
-        (p) => p.name.toLowerCase().contains("zj-80"), // optional filter
-        orElse: () => printers.first,
-      );
-
-      // ✅ Print directly to that printer
-      await Printing.directPrintPdf(
-        printer: printer,
-        onLayout: (_) async => pdfData,
-        name: 'Order_${order.id}',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            content: SizedBox(
-              width: 500,
-              height: 600,
-              child: PrintOrderWidget(order: order),
-            ),
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

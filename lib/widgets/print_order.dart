@@ -19,6 +19,22 @@ class PrintOrderWidget extends ConsumerWidget {
 
   const PrintOrderWidget({super.key, required this.order});
 
+  pw.Widget _buildItemBlock(OrderItem item) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          children: [
+            pw.Text('${item.quantity} x ${item.subProductName}'),
+             pw.SizedBox(width: 50),
+            pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+          ],
+        )
+        
+      ],
+    );
+  }
+
   Future<Uint8List> generatePdf(
     WidgetRef ref,
     Order order,
@@ -113,6 +129,7 @@ class PrintOrderWidget extends ConsumerWidget {
                 final categoryProducts = products.where(
                   (p) => p.categoryId == category.id,
                 );
+
                 final itemsInCategory = order.items.where(
                   (item) =>
                       categoryProducts.any((p) => p.id == item.product.id),
@@ -206,29 +223,54 @@ class PrintOrderWidget extends ConsumerWidget {
                     pw.Divider(), // 👈 this now separates the **category**
                   ],
                 );
-                
               }),
+
+              () {
+                final knownProductIds = products.map((p) => p.id).toSet();
+
+                final unmatchedItems = order.items.where(
+                  (item) => !knownProductIds.contains(item.product.id),
+                );
+
+                if (unmatchedItems.isEmpty) return pw.SizedBox();
+
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Custom Items',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.SizedBox(height: 4),
+                    ...unmatchedItems.map((item) => _buildItemBlock(item)),
+                    pw.Divider(),
+                  ],
+                );
+              }(),
+
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Subtotal:'),
+                  pw.SizedBox(width: 20),
                   pw.Text('£${subtotal.toStringAsFixed(2)}'),
                   pw.SizedBox(height: 10),
                 ],
               ),
               if (order.discount != null)
                 pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  
                   children: [
                     pw.Text('Discount ($discountText):'),
+                    pw.SizedBox(width: 50),
                     pw.Text('-£${discountAmount.toStringAsFixed(2)}'),
                     pw.SizedBox(height: 8),
                   ],
                 ),
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                
                 children: [
                   pw.Text('Total:'),
+                  pw.SizedBox(width: 36),
                   pw.Text('£${order.finalTotal.toStringAsFixed(2)}'),
                   pw.SizedBox(height: 8),
                 ],

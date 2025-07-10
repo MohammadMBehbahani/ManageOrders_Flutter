@@ -33,9 +33,9 @@ class Program
         [MarshalAs(UnmanagedType.LPStr)] public string pDataType;
     }
 
-    static void Main()
+    static void Main(string[] args)
     {
-        string printerName = "ZJ-80"; // Make sure it's exactly like shown in Get-Printer
+        string printerName = args.Length > 0 ? args[0] :"ZJ-80"; // Make sure it's exactly like shown in Get-Printer
         Console.WriteLine($"🔍 Attempting to open cash drawer on printer: '{printerName}'...");
 
         IntPtr hPrinter;

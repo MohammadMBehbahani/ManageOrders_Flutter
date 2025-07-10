@@ -21,7 +21,7 @@ import 'package:manageorders/srcreen/order/orderwidget/discount_select_screen.da
 import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart';
 import 'package:manageorders/srcreen/order/orderwidget/sub_product_widget.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
-import 'package:manageorders/widgets/print_silently.dart';
+import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {

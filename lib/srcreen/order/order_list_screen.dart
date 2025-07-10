@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/main.dart';
@@ -8,8 +6,7 @@ import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
-import 'package:manageorders/widgets/print_all_orders.dart';
-import 'package:manageorders/widgets/print_silently.dart';
+import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
 
 class SubmittedOrdersScreen extends ConsumerStatefulWidget {
   const SubmittedOrdersScreen({super.key});
@@ -89,39 +86,36 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
 
   void _printOrder(Order order) async {
     if (!mounted) return;
-        await printOrderSilently(context: context, ref: ref, order: order);
+    await printOrderSilently(context: context, ref: ref, order: order);
   }
 
   void _printAll() async {
-    final orders = ref.read(submittedOrdersProvider).valueOrNull ?? [];
-    showDialog(
+    final orders = await ref.read(submittedOrdersProvider.future);
+    if (orders.isEmpty) return;
+    if (!mounted) return;
+    final shouldPrint = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: SizedBox(
-          width: 500,
-          height: 600,
-          child: PrintAllOrdersWidget(orders: orders),
-        ),
+        title: const Text("Print Orders"),
+        content: const Text("Do you want to print all submitted orders?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("No"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes"),
+          ),
+        ],
       ),
     );
 
-    //orders.clear();
-    await ref.read(submittedOrdersProvider.notifier).clearAll();
-  }
-
-  Future<void> openCashDrawer() async {
-    try {
-      final result = await Process.run('OpenDrawer.exe', []);
-
-      if (result.exitCode == 0) {
-        // print('✅ Drawer opened: ${result.stdout}');
-      } else {
-        if (!mounted) return;
-        _showErrorDialog(context, 'Failed to open drawer:\n${result.stderr}');
-      }
-    } catch (e) {
+    // Only print if confirmed
+    if (shouldPrint == true) {
       if (!mounted) return;
-      _showErrorDialog(context, 'Exception occurred:\n$e');
+      await printOrdersSilently(context: context, ref: ref, orders: orders);
+      await ref.read(submittedOrdersProvider.notifier).clearAll();
     }
   }
 
@@ -137,23 +131,6 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     final notifier = ref.read(submittedOrdersProvider.notifier);
     notifier.refreshOrders();
   }
-
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Drawer Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   @override
   Widget build(BuildContext context) {

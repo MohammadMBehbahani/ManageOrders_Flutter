@@ -31,6 +31,14 @@ class PrintAllOrdersWidget extends StatelessWidget {
     final double cardTotal = orders
         .where((o) => o.paymentMethod.toLowerCase() == 'card')
         .fold(0, (sum, o) => sum + o.finalTotal);
+        
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    String formattedDateTime() {
+      final now = DateTime.now();
+      return "${now.year}-${twoDigits(now.month)}-${twoDigits(now.day)} "
+            "${twoDigits(now.hour)}:${twoDigits(now.minute)}:${twoDigits(now.second)}";
+    }
 
     final pdf = pw.Document();
 
@@ -81,6 +89,11 @@ class PrintAllOrdersWidget extends StatelessWidget {
                 style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
             pw.Divider(),
             _row('Net Sale', currency.format(totalAmount)),
+
+            
+            pw.Divider(),
+            
+            _row('Date', formattedDateTime())
           ],
         ),
       ),

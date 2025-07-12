@@ -129,8 +129,8 @@ class OrderLeftPanel extends StatelessWidget {
                     return ChoiceChip(
                       label: Text(p.name, style: const TextStyle(fontSize: 22)),
                       labelPadding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 22,
+                        horizontal: 18,
+                        vertical: 18,
                       ),
                       selected: isSelected,
                       selectedColor: chipColor?..withAlpha(204),

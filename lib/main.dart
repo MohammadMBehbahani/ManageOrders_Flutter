@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/srcreen/category_screen.dart';
 import 'package:manageorders/srcreen/extra_screen.dart';
 import 'package:manageorders/srcreen/home_screen.dart';
+import 'package:manageorders/srcreen/manage_left_view.dart';
 import 'package:manageorders/srcreen/management/management_screen.dart';
 import 'package:manageorders/srcreen/order/order_list_screen.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
@@ -54,6 +55,7 @@ class ManageOrdersApp extends StatelessWidget {
         '/order_list_screen': (context) => const SubmittedOrdersScreen(),
         '/management_screen': (context) => const ManagementScreen(),
         '/shope_detail_screen': (context) => const ShopDetailsScreen(),
+        '/manage_left_view_screen': (context) => const ManageLeftViewScreen()
       },
     );
   }

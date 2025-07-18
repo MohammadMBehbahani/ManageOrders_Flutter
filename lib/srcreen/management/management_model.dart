@@ -17,7 +17,7 @@ class ManagementItems {
     ManagementItem(title: 'Extra', routeName: '/extra_screen'),
     ManagementItem(title: 'product_screen', routeName: '/product_screen'),
     ManagementItem(title: 'Add topping', routeName: '/topping_screen'),
-    ManagementItem(title: 'Shop details', routeName: '/shope_detail_screen')
-    
+    ManagementItem(title: 'Shop details', routeName: '/shope_detail_screen'),
+    ManagementItem(title: 'Manage Left Order View', routeName: '/manage_left_view_screen')
   ];
 }

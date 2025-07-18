@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/models/order_extra.dart';
 import 'package:manageorders/models/order_topping.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/sub_product_option.dart';
+import 'package:manageorders/providers/manage_left_view_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
-class OrderLeftPanel extends StatelessWidget {
+class OrderLeftPanel extends ConsumerWidget {
   final List<Category> categories;
   final List<Product> filteredProducts;
   final String? selectedCategoryId;
@@ -43,7 +45,16 @@ class OrderLeftPanel extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(manageLeftViewProvider).value;
+    
+    final categoryFontSize = (view?.fontsizecategory ?? 22).toDouble();
+    final categoryBoxHeight = (view?.boxheightcategory ?? 18).toDouble();
+    final categoryBoxWidth = (view?.boxwidthcategory ?? 18).toDouble();
+    final productFontSize = (view?.fontsizeproduct ?? 22).toDouble();
+    final productBoxHeight = (view?.boxheightproduct ?? 18).toDouble();
+    final productBoxWidth = (view?.boxwidthproduct ?? 18).toDouble();
+
     final screenHeight = MediaQuery.of(context).size;
     final maxPadHeight = screenHeight.height;
     final minPadHeight =
@@ -88,11 +99,11 @@ class OrderLeftPanel extends StatelessWidget {
                         (c) => ChoiceChip(
                           label: Text(
                             c.name,
-                            style: const TextStyle(fontSize: 18),
+                            style:  TextStyle(fontSize: categoryFontSize),
                           ),
-                          labelPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                          labelPadding:  EdgeInsets.symmetric(
+                            horizontal: categoryBoxWidth,
+                            vertical: categoryBoxHeight,
                           ),
                           selected: selectedCategoryId == c.id,
                           onSelected: (_) => onCategorySelect(c.id),
@@ -127,10 +138,10 @@ class OrderLeftPanel extends StatelessWidget {
                     final chipColor = p.color != null ? Color(p.color!) : null;
 
                     return ChoiceChip(
-                      label: Text(p.name, style: const TextStyle(fontSize: 22)),
-                      labelPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 18,
+                      label: Text(p.name, style: TextStyle(fontSize: productFontSize)),
+                      labelPadding: EdgeInsets.symmetric(
+                        horizontal: productBoxWidth,
+                        vertical: productBoxHeight,
                       ),
                       selected: isSelected,
                       selectedColor: chipColor?..withAlpha(204),

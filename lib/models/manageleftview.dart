@@ -6,6 +6,7 @@ class ManageLeftView {
   final int? boxheightcategory;
   final int? boxwidthcategory;
   final int? boxheightproduct;
+  final int tottalfontsize;
 
   ManageLeftView({
     required this.id,
@@ -15,6 +16,7 @@ class ManageLeftView {
     this.boxheightcategory,
     this.boxwidthcategory,
     this.boxheightproduct,
+    required this.tottalfontsize,
   });
 
   factory ManageLeftView.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class ManageLeftView {
       boxheightcategory: json['boxheightcategory'],
       boxwidthcategory: json['boxwidthcategory'],
       boxheightproduct: json['boxheightproduct'],
+      tottalfontsize: json['Tottalfontsize'] ?? 0,
     );
   }
 
@@ -38,9 +41,11 @@ class ManageLeftView {
       'boxheightcategory': boxheightcategory,
       'boxwidthcategory': boxwidthcategory,
       'boxheightproduct': boxheightproduct,
+      'Tottalfontsize': tottalfontsize,
     };
   }
 
-  factory ManageLeftView.fromMap(Map<String, dynamic> map) => ManageLeftView.fromJson(map);
+  factory ManageLeftView.fromMap(Map<String, dynamic> map) =>
+      ManageLeftView.fromJson(map);
   Map<String, dynamic> toMap() => toJson();
 }

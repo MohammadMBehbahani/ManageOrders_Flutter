@@ -19,6 +19,7 @@ class _ManageLeftViewScreenState extends ConsumerState<ManageLeftViewScreen> {
   final _bhCategoryController = TextEditingController();
   final _bwCategoryController = TextEditingController();
   final _bhProductController = TextEditingController();
+  final _tottalfontsizeController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -31,6 +32,8 @@ class _ManageLeftViewScreenState extends ConsumerState<ManageLeftViewScreen> {
       _bhCategoryController.text = existing.boxheightcategory?.toString() ?? '';
       _bwCategoryController.text = existing.boxwidthcategory?.toString() ?? '';
       _bhProductController.text = existing.boxheightproduct?.toString() ?? '';
+
+      _tottalfontsizeController.text = existing.tottalfontsize.toString();
     }
   }
 
@@ -45,6 +48,7 @@ class _ManageLeftViewScreenState extends ConsumerState<ManageLeftViewScreen> {
       boxheightcategory: int.tryParse(_bhCategoryController.text),
       boxwidthcategory: int.tryParse(_bwCategoryController.text),
       boxheightproduct: int.tryParse(_bhProductController.text),
+      tottalfontsize: int.parse(_tottalfontsizeController.text)
     );
 
     try {
@@ -77,6 +81,7 @@ class _ManageLeftViewScreenState extends ConsumerState<ManageLeftViewScreen> {
     _bhCategoryController.dispose();
     _bwCategoryController.dispose();
     _bhProductController.dispose();
+    _tottalfontsizeController.dispose();
     super.dispose();
   }
 
@@ -96,6 +101,7 @@ class _ManageLeftViewScreenState extends ConsumerState<ManageLeftViewScreen> {
               _buildNumberField('Font Size Product', _fsProductController),
               _buildNumberField('Box Height Product', _bhProductController),
               _buildNumberField('Box Width Product', _bwProductController),
+              _buildNumberField('Font Size TotalPrice', _tottalfontsizeController),
               const SizedBox(height: 20),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/order_item.dart';
 import 'package:manageorders/models/discount.dart';
+import 'package:manageorders/providers/manage_left_view_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
-class OrderRightPanel extends StatelessWidget {
+class OrderRightPanel extends ConsumerWidget {
   final List<OrderItem> orderItems;
   final Discount? selectedDiscount;
   final double finalTotal;
@@ -41,7 +43,14 @@ class OrderRightPanel extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(manageLeftViewProvider).value;
+    final tottalfontsiz =
+        (view == null ||
+            view.tottalfontsize <= 0)
+        ? 18.0
+        : view.tottalfontsize.toDouble();
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -161,7 +170,10 @@ class OrderRightPanel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               'Total: £${finalTotal.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: tottalfontsiz,
+              ),
             ),
           ),
 

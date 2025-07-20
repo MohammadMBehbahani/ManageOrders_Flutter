@@ -16,9 +16,16 @@ class ManageLeftViewDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await _createDB(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE manage_left_views ADD COLUMN Tottalfontsize INTEGER DEFAULT 0',
+          );
+        }
       },
     );
   }
@@ -32,7 +39,8 @@ class ManageLeftViewDatabase {
         boxwidthproduct INTEGER,
         boxheightcategory INTEGER,
         boxwidthcategory INTEGER,
-        boxheightproduct INTEGER
+        boxheightproduct INTEGER,
+        Tottalfontsize INTEGER DEFAULT 0
       )
     ''');
   }
@@ -64,11 +72,7 @@ class ManageLeftViewDatabase {
 
   static Future<void> deleteView(String id) async {
     final db = await database;
-    await db.delete(
-      'manage_left_views',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('manage_left_views', where: 'id = ?', whereArgs: [id]);
   }
 
   static Future<ManageLeftView?> getViewById(String id) async {

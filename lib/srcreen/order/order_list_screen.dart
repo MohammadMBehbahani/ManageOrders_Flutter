@@ -133,7 +133,21 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     refresh();
   }
 
+  void _printAllNoClear() async {
+    final orders = await ref.read(submittedOrdersProvider.future);
+    if (orders.isEmpty) return;
+    if (!mounted) return;
+     await printOrdersSilently(context: context, ref: ref, orders: orders);
+    refresh();
+  }
+
   void _editOrder(Order order) async {
+    if(order.status == 'refunded') {
+      setState(() {
+        selectedOrder = null;
+      });
+      return;
+    };
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => OrderScreen(orderToEdit: order)));
@@ -181,6 +195,11 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                 ElevatedButton(
                   onPressed: () async => _printAll(),
                   child: const Text('Print All'),
+                ),
+                 const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () async => _printAllNoClear(),
+                  child: const Text('Print All - X Report'),
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(

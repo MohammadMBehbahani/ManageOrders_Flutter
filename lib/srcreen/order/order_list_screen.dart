@@ -147,7 +147,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
         selectedOrder = null;
       });
       return;
-    };
+    }
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => OrderScreen(orderToEdit: order)));

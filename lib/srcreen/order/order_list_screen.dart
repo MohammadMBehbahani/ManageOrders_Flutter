@@ -137,12 +137,12 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     final orders = await ref.read(submittedOrdersProvider.future);
     if (orders.isEmpty) return;
     if (!mounted) return;
-     await printOrdersSilently(context: context, ref: ref, orders: orders);
+    await printOrdersSilently(context: context, ref: ref, orders: orders);
     refresh();
   }
 
   void _editOrder(Order order) async {
-    if(order.status == 'refunded') {
+    if (order.status == 'refunded') {
       setState(() {
         selectedOrder = null;
       });
@@ -159,6 +159,41 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     final notifier = ref.read(submittedOrdersProvider.notifier);
     notifier.refreshOrders();
     refresh();
+  }
+
+  Widget _infoBox(
+    String label,
+    double amount,
+    double fontSize, {
+    bool isRefund = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(
+              fontSize: fontSize * 0.7,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            '£${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: fontSize,
+              color: isRefund ? Colors.red : Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -196,7 +231,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                   onPressed: () async => _printAll(),
                   child: const Text('Print All'),
                 ),
-                 const SizedBox(height: 50),
+                const SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: () async => _printAllNoClear(),
                   child: const Text('Print All - X Report'),
@@ -280,36 +315,31 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                             child: const Text('Clear Filter'),
                           ),
                           const SizedBox(width: 18),
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Total: £${total.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 44),
-                                  ),
-                                  Text(
-                                    'Cash: £${totalCash.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 44),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(width: 58),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Card: £${totalCard.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 44),
-                                  ),
-                                  Text(
-                                    'Refunds: -£${totalRefund.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 44),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Adjust font size based on available width
+                                double baseFont = constraints.maxWidth < 800
+                                    ? 22
+                                    : 36;
+
+                                return Wrap(
+                                  spacing: 24,
+                                  runSpacing: 12,
+                                  children: [
+                                    _infoBox('Total', total, baseFont),
+                                    _infoBox('Cash', totalCash, baseFont),
+                                    _infoBox('Card', totalCard, baseFont),
+                                    _infoBox(
+                                      'Refunds',
+                                      -totalRefund,
+                                      baseFont,
+                                      isRefund: true,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       );

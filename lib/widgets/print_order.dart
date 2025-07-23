@@ -26,11 +26,10 @@ class PrintOrderWidget extends ConsumerWidget {
         pw.Row(
           children: [
             pw.Text('${item.quantity} x ${item.subProductName}'),
-             pw.SizedBox(width: 50),
+            pw.SizedBox(width: 50),
             pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
           ],
-        )
-        
+        ),
       ],
     );
   }
@@ -258,7 +257,6 @@ class PrintOrderWidget extends ConsumerWidget {
               ),
               if (order.discount != null)
                 pw.Row(
-                  
                   children: [
                     pw.Text('Discount ($discountText):'),
                     pw.SizedBox(width: 50),
@@ -267,7 +265,6 @@ class PrintOrderWidget extends ConsumerWidget {
                   ],
                 ),
               pw.Row(
-                
                 children: [
                   pw.Text('Total:'),
                   pw.SizedBox(width: 36),
@@ -275,6 +272,22 @@ class PrintOrderWidget extends ConsumerWidget {
                   pw.SizedBox(height: 8),
                 ],
               ),
+             
+              if (order.status == 'refunded')
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(4),
+                  color: PdfColors.red,
+                  child: pw.Center(
+                    child: pw.Text(
+                      'REFUNDED',
+                      style: pw.TextStyle(
+                        color: PdfColors.white,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
               pw.SizedBox(height: 8),
               pw.Text('Payment: ${order.paymentMethod.toUpperCase()}'),
               pw.Text('Date: ${dateFormat.format(order.createdAt)}'),

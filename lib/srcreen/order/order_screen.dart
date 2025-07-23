@@ -197,6 +197,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           discount: selectedDiscount,
           paymentMethod: paymentMethod,
         );
+    if(order.finalTotal <= 0){
+      return;
+    }
     if (paymentMethod == 'cash') {
       final total = order.finalTotal;
       await Navigator.of(context).push<Order>(

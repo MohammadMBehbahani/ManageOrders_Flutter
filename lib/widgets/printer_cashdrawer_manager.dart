@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:manageorders/models/drawerlogs.dart';
+import 'package:manageorders/providers/drawer_log_provider.dart';
 import 'package:manageorders/widgets/print_all_orders.dart';
 import 'package:manageorders/widgets/print_order.dart';
 import 'package:printing/printing.dart';
@@ -84,22 +86,27 @@ Future<void> printOrdersSilently({
   }
 }
 
+Future<void> openCashDrawer(WidgetRef ref, {
+  String printerName = 'ZJ-80',
+  String reason = 'Manual Open',
+}) async {
+  try {
+    
+    await ref.read(drawerLogsProvider.notifier).addLogFromReason(reason);
 
- Future<void> openCashDrawer([String printerName = 'ZJ-80']) async {
-    try {
-      final result = await Process.run('OpenDrawer.exe', [printerName]);
+    final result = await Process.run('OpenDrawer.exe', [printerName]);
 
-      if (result.exitCode == 0) {
-        // print('✅ Drawer opened: ${result.stdout}');
-      } else {
-       // if (!mounted) return;
-       //_showErrorDialog(context, 'Exception occurred:\n$e');
-      }
-    } catch (e) {
-      //if (!mounted) return;
-     // _showErrorDialog(context, 'Exception occurred:\n$e');
+    if (result.exitCode == 0) {
+      // print('✅ Drawer opened: ${result.stdout}');
+    } else {
+      // if (!mounted) return;
+      //_showErrorDialog(context, 'Exception occurred:\n$e');
     }
+  } catch (e) {
+    //if (!mounted) return;
+    // _showErrorDialog(context, 'Exception occurred:\n$e');
   }
+}
 
   // void _showErrorDialog(BuildContext context, String message) {
   //   showDialog(

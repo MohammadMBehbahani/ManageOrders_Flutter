@@ -15,7 +15,7 @@ class OrderDatabase {
     final path = join(await getDatabasesPath(), 'order.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE orders (
@@ -24,7 +24,8 @@ class OrderDatabase {
             discount TEXT,
             finalTotal REAL,
             paymentMethod TEXT,
-            createdAt TEXT
+            createdAt TEXT,
+            status TEXT
           )
         ''');
       },
@@ -35,6 +36,9 @@ class OrderDatabase {
         }
         if (oldVersion < 3) {
           await db.execute('ALTER TABLE orders ADD COLUMN paymentMethod TEXT');
+        }
+        if (oldVersion < 4) {
+          await db.execute('ALTER TABLE orders ADD COLUMN status TEXT');
         }
         // Handle future upgrades here if needed
       },
@@ -51,6 +55,7 @@ class OrderDatabase {
         'finalTotal': order.finalTotal,
         'paymentMethod': order.paymentMethod,
         'createdAt': order.createdAt.toIso8601String(),
+        'status': order.status
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       //print('Error submitting order: $e');
@@ -82,5 +87,15 @@ class OrderDatabase {
   static Future<void> clear() async {
     final db = await database;
     await db.delete('orders');
+  }
+
+  static Future<void> updateOrderStatus(String id, String status) async {
+    final db = await database;
+    await db.update(
+      'orders',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

@@ -6,6 +6,7 @@ import 'package:manageorders/providers/submitted_order_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/srcreen/order/order_screen.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
+import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
 
 class SubmittedOrdersScreen extends ConsumerStatefulWidget {
@@ -48,13 +49,24 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     });
   }
 
+  void refresh() {
+    final notifier = ref.read(submittedOrdersProvider.notifier);
+
+    setState(() {
+      toDate = null;
+      fromDate = null;
+      selectedOrder = null;
+    });
+    notifier.refreshOrders();
+  }
+
   Future<void> _pickDateTime(BuildContext context, bool isFrom) async {
     final initial = DateTime.now();
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(),
     );
     if (pickedDate == null) return;
 
@@ -87,6 +99,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
   void _printOrder(Order order) async {
     if (!mounted) return;
     await printOrderSilently(context: context, ref: ref, order: order);
+    refresh();
   }
 
   void _printAll() async {
@@ -117,6 +130,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
       await printOrdersSilently(context: context, ref: ref, orders: orders);
       await ref.read(submittedOrdersProvider.notifier).clearAll();
     }
+    refresh();
   }
 
   void _editOrder(Order order) async {
@@ -130,6 +144,7 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
     });
     final notifier = ref.read(submittedOrdersProvider.notifier);
     notifier.refreshOrders();
+    refresh();
   }
 
   @override
@@ -169,7 +184,10 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(
-                  onPressed: () async => openCashDrawer(),
+                  onPressed: () async => openCashDrawer(
+                    ref,
+                    reason: "Open Drawer: From Order List (Manual Open)",
+                  ),
                   child: const Text('Open Drawer'),
                 ),
               ],
@@ -183,40 +201,105 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _pickDateTime(context, true),
-                        child: Text(
-                          fromDate != null
-                              ? 'From: ${DateFormat.yMd().add_Hm().format(fromDate!)}'
-                              : 'Pick From',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _pickDateTime(context, false),
-                        child: Text(
-                          toDate != null
-                              ? 'To: ${DateFormat.yMd().add_Hm().format(toDate!)}'
-                              : 'Pick To',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            toDate = null;
-                            fromDate = null;
-                            selectedOrder = null;
-                          });
-                          notifier.refreshOrders();
-                        },
-                        child: const Text('Clear Filter'),
-                      ),
-                    ],
+                  child: ordersAsync.when(
+                    data: (orders) {
+                      final filtered = orders.where((order) {
+                        if (fromDate != null &&
+                            order.createdAt.isBefore(fromDate!)) {
+                          return false;
+                        }
+                        if (toDate != null &&
+                            order.createdAt.isAfter(toDate!)) {
+                          return false;
+                        }
+                        return true;
+                      }).toList();
+
+                      double total = 0;
+                      double totalCash = 0;
+                      double totalCard = 0;
+                      double totalRefund = 0;
+
+                      for (final order in filtered) {
+                        final isRefunded = order.status == 'refunded';
+                        if (isRefunded) {
+                          totalRefund += order.finalTotal;
+                        } else {
+                          total += order.finalTotal;
+                          if (order.paymentMethod == 'cash') {
+                            totalCash += order.finalTotal;
+                          } else if (order.paymentMethod == 'card') {
+                            totalCard += order.finalTotal;
+                          }
+                        }
+                      }
+
+                      return Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _pickDateTime(context, true),
+                            child: Text(
+                              fromDate != null
+                                  ? 'From: ${DateFormat.yMd().add_Hm().format(fromDate!)}'
+                                  : 'Pick From',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () => _pickDateTime(context, false),
+                            child: Text(
+                              toDate != null
+                                  ? 'To: ${DateFormat.yMd().add_Hm().format(toDate!)}'
+                                  : 'Pick To',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              refresh();
+                            },
+                            child: const Text('Clear Filter'),
+                          ),
+                          const SizedBox(width: 18),
+                          Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Total: £${total.toStringAsFixed(2)}',
+                                    style: TextStyle(fontSize: 44),
+                                  ),
+                                  Text(
+                                    'Cash: £${totalCash.toStringAsFixed(2)}',
+                                    style: TextStyle(fontSize: 44),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 58),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Card: £${totalCard.toStringAsFixed(2)}',
+                                    style: TextStyle(fontSize: 44),
+                                  ),
+                                  Text(
+                                    'Refunds: -£${totalRefund.toStringAsFixed(2)}',
+                                    style: TextStyle(fontSize: 44),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                    loading: () => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
                 ),
+
                 Expanded(
                   child: ordersAsync.when(
                     data: (orders) {
@@ -235,34 +318,80 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                             (a, b) => b.createdAt.compareTo(a.createdAt),
                           );
 
-                      return ListView.builder(
-                        itemCount: filtered.length,
-                        itemBuilder: (ctx, i) {
-                          final order = filtered[i];
-                          return ListTile(
-                            selected: selectedOrder?.id == order.id,
-                            selectedTileColor: Colors.grey.shade200,
-                            title: Text(
-                              'Order ${order.id.substring(0, 6)} - £${order.finalTotal.toStringAsFixed(2)}',
-                            ),
-                            subtitle: Text(
-                              DateFormat.yMd().add_Hm().format(order.createdAt),
-                            ),
-                            onTap: () => setState(() => selectedOrder = order),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await notifier.deleteOrder(order.id);
-                                setState(() {
-                                  toDate = null;
-                                  fromDate = null;
-                                  selectedOrder = null;
-                                });
-                                notifier.refreshOrders();
-                              },
-                            ),
-                          );
-                        },
+                      return ScrollWithTouch(
+                        child: ListView.builder(
+                          itemCount: filtered.length,
+                          itemBuilder: (ctx, i) {
+                            final order = filtered[i];
+                            return ListTile(
+                              tileColor: order.status == 'refunded'
+                                  ? Colors.red.shade100
+                                  : null,
+                              selected: selectedOrder?.id == order.id,
+                              selectedTileColor: Colors.grey.shade200,
+                              title: Text(
+                                'Order ${order.id.substring(0, 6)} - £${order.finalTotal.toStringAsFixed(2)}',
+                              ),
+                              subtitle: Text(
+                                DateFormat.yMd().add_Hm().format(
+                                  order.createdAt,
+                                ),
+                              ),
+                              onTap: () =>
+                                  setState(() => selectedOrder = order),
+                              trailing: order.status == 'refunded'
+                                  ? const Text(
+                                      'Refunded',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : TextButton.icon(
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text("Confirm Refund"),
+                                            content: Text(
+                                              "Are you sure you want to refund order ${order.id.substring(0, 6)}?",
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(false),
+                                                child: const Text("Cancel"),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(true),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                                child: const Text("Refund"),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+
+                                        if (confirm == true) {
+                                          await notifier.refundOrder(order.id);
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.refresh,
+                                        color: Colors.red,
+                                      ),
+                                      label: Text(
+                                        'Refund',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                            );
+                          },
+                        ),
                       );
                     },
                     loading: () =>

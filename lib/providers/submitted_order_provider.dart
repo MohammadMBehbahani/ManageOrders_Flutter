@@ -3,9 +3,11 @@ import 'package:manageorders/database/order_database.dart';
 import 'package:manageorders/models/order.dart';
 
 final submittedOrdersProvider =
-    AsyncNotifierProvider<SubmittedOrdersNotifier, List<Order>>(SubmittedOrdersNotifier.new);
+    AutoDisposeAsyncNotifierProvider<SubmittedOrdersNotifier, List<Order>>(
+      SubmittedOrdersNotifier.new,
+    );
 
-class SubmittedOrdersNotifier extends AsyncNotifier<List<Order>> {
+class SubmittedOrdersNotifier extends AutoDisposeAsyncNotifier<List<Order>> {
   @override
   Future<List<Order>> build() async {
     return await OrderDatabase.getAllOrders();
@@ -18,6 +20,11 @@ class SubmittedOrdersNotifier extends AsyncNotifier<List<Order>> {
 
   Future<void> deleteOrder(String id) async {
     await OrderDatabase.deleteOrder(id);
+    await refreshOrders();
+  }
+
+  Future<void> refundOrder(String id) async {
+    await OrderDatabase.updateOrderStatus(id, 'refunded');
     await refreshOrders();
   }
 

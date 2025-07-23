@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/srcreen/category_screen.dart';
+import 'package:manageorders/srcreen/drawer_log_screen.dart';
 import 'package:manageorders/srcreen/extra_screen.dart';
 import 'package:manageorders/srcreen/home_screen.dart';
 import 'package:manageorders/srcreen/manage_left_view.dart';
@@ -55,7 +56,9 @@ class ManageOrdersApp extends StatelessWidget {
         '/order_list_screen': (context) => const SubmittedOrdersScreen(),
         '/management_screen': (context) => const ManagementScreen(),
         '/shope_detail_screen': (context) => const ShopDetailsScreen(),
-        '/manage_left_view_screen': (context) => const ManageLeftViewScreen()
+        '/manage_left_view_screen': (context) => const ManageLeftViewScreen(),
+         '/drawer_logs': (context) => const DrawerLogsScreen()
+        
       },
     );
   }

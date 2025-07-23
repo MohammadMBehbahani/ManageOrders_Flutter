@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/category.dart';
 import 'package:manageorders/providers/category_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key});
@@ -121,7 +122,13 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     final asyncCategories = ref.watch(categoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      appBar: AppBar(title: const Text('Categories'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

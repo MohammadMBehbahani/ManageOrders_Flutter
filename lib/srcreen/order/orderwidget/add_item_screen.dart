@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:manageorders/widgets/full_keyboard_widget.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class AddOrderItemProductScreen extends StatefulWidget {
   const AddOrderItemProductScreen({super.key});
@@ -60,7 +61,14 @@ class _AddOrderItemProductScreenState extends State<AddOrderItemProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Product Item')),
+      appBar: AppBar(title: const Text('Add Product Item'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

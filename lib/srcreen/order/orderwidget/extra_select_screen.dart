@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/order_extra.dart';
 import 'package:manageorders/models/extra.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class ExtraSelectScreen extends StatefulWidget {
   final List<Extra> availableExtras;
@@ -43,7 +44,13 @@ class _ExtraSelectScreenState extends State<ExtraSelectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select or Add Extra')),
+      appBar: AppBar(title: const Text('Select or Add Extra'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

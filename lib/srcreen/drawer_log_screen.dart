@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:manageorders/main.dart';
 import 'package:manageorders/providers/drawer_log_provider.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class DrawerLogsScreen extends ConsumerStatefulWidget {
   const DrawerLogsScreen({super.key});
@@ -65,7 +66,13 @@ class _DrawerLogsScreenState extends ConsumerState<DrawerLogsScreen> with RouteA
     final logsAsync = ref.watch(drawerLogsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Drawer Logs')),
+      appBar: AppBar(title: const Text('Drawer Logs'), 
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Column(
         children: [
           Padding(

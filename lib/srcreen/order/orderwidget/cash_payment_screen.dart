@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/widgets/number_pad.dart';
 import 'package:manageorders/models/order.dart';
-import 'package:manageorders/widgets/printer_cashdrawer_manager.dart'; // if you have it
+import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
+import 'package:manageorders/widgets/time_display_widget.dart'; // if you have it
 
 class CashPaymentScreen extends ConsumerStatefulWidget {
   final double totalAmount;
@@ -107,7 +108,13 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cash Payment')),
+      appBar: AppBar(title: const Text('Cash Payment'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

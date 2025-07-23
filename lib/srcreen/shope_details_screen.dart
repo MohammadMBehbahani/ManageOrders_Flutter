@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/providers/shop_details_provider.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class ShopDetailsScreen extends ConsumerStatefulWidget {
   const ShopDetailsScreen({super.key});
@@ -53,7 +54,13 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Shop Details')),
+      appBar: AppBar(title: const Text('Shop Details'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

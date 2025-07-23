@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/discount.dart';
 import 'package:manageorders/widgets/number_pad.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class DiscountSelectScreen extends StatefulWidget {
   const DiscountSelectScreen({super.key});
@@ -28,7 +29,13 @@ class _DiscountSelectScreenState extends State<DiscountSelectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Discount')),
+      appBar: AppBar(title: const Text('Add Discount'),
+       actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

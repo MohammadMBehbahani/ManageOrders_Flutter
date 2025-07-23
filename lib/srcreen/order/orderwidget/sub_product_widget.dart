@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:manageorders/models/order_extra.dart';
 import 'package:manageorders/models/order_topping.dart';
 import 'package:manageorders/models/sub_product_option.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class SubProductExtrasScreen extends StatefulWidget {
   final List<SubProductOption> subProducts;
@@ -35,7 +36,13 @@ class _SubProductExtrasScreenState extends State<SubProductExtrasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Customize Product')),
+      appBar: AppBar(title: const Text('Customize Product'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

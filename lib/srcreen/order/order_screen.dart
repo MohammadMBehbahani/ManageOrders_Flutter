@@ -22,6 +22,7 @@ import 'package:manageorders/srcreen/order/orderwidget/extra_select_screen.dart'
 import 'package:manageorders/srcreen/order/orderwidget/sub_product_widget.dart';
 import 'package:manageorders/srcreen/order/orderwidget/topping_select_screen.dart';
 import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -375,6 +376,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         ),
         backgroundColor: Color(0xFF1A1E24),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

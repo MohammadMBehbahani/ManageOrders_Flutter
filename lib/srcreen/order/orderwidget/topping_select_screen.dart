@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manageorders/models/order_topping.dart';
 import 'package:manageorders/models/topping.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class ToppingSelectScreen extends StatefulWidget {
   final List<Topping> availableToppings;
@@ -51,7 +52,13 @@ class _ToppingSelectScreenState extends State<ToppingSelectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select or Add Topping')),
+      appBar: AppBar(title: const Text('Select or Add Topping'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

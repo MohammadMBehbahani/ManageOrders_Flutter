@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/providers/category_provider.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
@@ -120,6 +121,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product == null ? 'Add Product' : 'Edit Product'),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]
       ),
       body: categoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

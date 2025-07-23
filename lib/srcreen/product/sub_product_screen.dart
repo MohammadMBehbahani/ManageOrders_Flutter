@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/models/sub_product_option.dart';
 import 'package:manageorders/providers/product_provider.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class AddSubProductScreen extends ConsumerStatefulWidget {
@@ -142,7 +143,13 @@ class _AddSubProductOptionsScreenState
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text('SubProduct Options for "${_currentProduct.name}"')),
+      appBar: AppBar(title: Text('SubProduct Options for "${_currentProduct.name}"'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),

@@ -9,6 +9,7 @@ import 'package:manageorders/srcreen/product/product_extra_screen.dart';
 import 'package:manageorders/srcreen/product/product_topping_screen.dart';
 import 'package:manageorders/srcreen/product/sub_product_screen.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductScreen extends ConsumerStatefulWidget {
@@ -77,7 +78,13 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     final asyncProducts = ref.watch(productProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
+      appBar: AppBar(title: const Text('Products'),
+       actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: asyncCategories.when(

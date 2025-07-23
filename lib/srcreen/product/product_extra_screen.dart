@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/product.dart';
 import 'package:manageorders/providers/product_provider.dart';
 import 'package:manageorders/providers/extra_provider.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class AddProductExtrasScreen extends ConsumerStatefulWidget {
   final Product product;
@@ -48,7 +49,13 @@ class _AddProductExtrasState extends ConsumerState<AddProductExtrasScreen> {
     final extrasAsync = ref.watch(extraProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Extras')),
+      appBar: AppBar(title: const Text('Select Extras'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: extrasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('No Data')),

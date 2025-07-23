@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/topping.dart';
 import 'package:manageorders/providers/topping_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class ToppingScreen extends ConsumerStatefulWidget {
   const ToppingScreen({super.key});
@@ -68,7 +69,13 @@ class _ToppingScreenState extends ConsumerState<ToppingScreen> {
     final asyncTopping = ref.watch(toppingProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Topping')),
+      appBar: AppBar(title: const Text('Topping'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

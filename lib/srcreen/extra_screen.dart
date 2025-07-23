@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/models/extra.dart';
 import 'package:manageorders/providers/extra_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
+import 'package:manageorders/widgets/time_display_widget.dart';
 
 class ExtraScreen extends ConsumerStatefulWidget {
   const ExtraScreen({super.key});
@@ -68,7 +69,13 @@ class _ExtraScreenState extends ConsumerState<ExtraScreen> {
     final asyncCategories = ref.watch(extraProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Extra')),
+      appBar: AppBar(title: const Text('Extra'),
+      actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: TimeDisplayWidget(),
+          ),
+        ]),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

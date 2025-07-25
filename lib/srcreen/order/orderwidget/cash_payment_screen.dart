@@ -65,14 +65,14 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
         barrierDismissible: true,
         builder: (_) => AlertDialog(
           title: const Text("Change to return"),
-          content: Text("£$change"),
+          content: Text("£$change", style: TextStyle(fontSize: 120),),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // close change dialog
                 Navigator.of(context).pop(order);
               },
-              child: const Text("OK"),
+              child: const Text("OK", style: TextStyle(fontSize: 30)),
             ),
           ],
         ),

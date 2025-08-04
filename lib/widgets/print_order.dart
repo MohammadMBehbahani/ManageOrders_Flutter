@@ -42,12 +42,19 @@ class PrintOrderWidget extends ConsumerWidget {
     PdfPageFormat? format,
   ]) async {
     final shopDetailsAsync = await ref.watch(shopDetailsProvider.future);
+    const double lineHeight = 20.0;
+    const double headerHeight = 200.0;
+    const double footerHeight = 40.0;
 
-    final pageFormat = PdfPageFormat(
-      227, // width in points (80 mm ≈ 3.15 inch * 72)
-      400, // height in points (change based on receipt length, or set large for scroll)
-      marginAll: 5, // optional margins in points
-    );
+    double calculateReceiptHeight(int itemCount) {
+      return headerHeight + (itemCount * lineHeight) + footerHeight;
+    }
+
+    final itemCount = (order.items.length + products.length + categories.length); // or however you're storing them
+    final calculatedHeight = calculateReceiptHeight(itemCount);
+
+    // 227 points wide (≈ 80mm), dynamic height
+    final pageFormat = PdfPageFormat(227, calculatedHeight, marginAll: 5);
 
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final shortOrderId = order.id.replaceAll(RegExp(r'\D'), '');
@@ -272,7 +279,7 @@ class PrintOrderWidget extends ConsumerWidget {
                   pw.SizedBox(height: 8),
                 ],
               ),
-             
+
               if (order.status == 'refunded')
                 pw.Container(
                   padding: const pw.EdgeInsets.all(4),

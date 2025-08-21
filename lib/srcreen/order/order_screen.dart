@@ -192,59 +192,71 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 
   Future<void> _submitOrder(String paymentMethod) async {
-    final order = ref
-        .read(orderProvider.notifier)
-        .getDraftOrder(
-          discount: selectedDiscount,
-          paymentMethod: paymentMethod,
-        );
+    final orderNotifier = ref.read(orderProvider.notifier);
+
+    final order = orderNotifier.getDraftOrder(
+      discount: selectedDiscount,
+      paymentMethod: paymentMethod,
+      cashPaid: 0.0,
+      cardPaid: 0.0,
+    );
+
     if (order.finalTotal <= 0) {
       return;
     }
-    if (paymentMethod == 'cash') {
-      final total = order.finalTotal;
-      await Navigator.of(context).push<Order>(
-        MaterialPageRoute(
-          builder: (_) => CashPaymentScreen(
-            totalAmount: total,
-            onSubmit: () => ref
+    try {
+      if (paymentMethod == 'cash') {
+        final total = order.finalTotal;
+        final remaining = await Navigator.of(context).push<double>(
+          MaterialPageRoute(
+            builder: (_) => CashPaymentScreen(totalAmount: total),
+          ),
+        );
+        if (remaining != null) {
+          if (remaining == total) {
+            ref
                 .read(orderProvider.notifier)
                 .submitOrder(
                   paymentMethod: paymentMethod,
                   discount: selectedDiscount,
-                ),
-          ),
-        ),
-      );
-
-      if (isPrintChecked) {
-        if (!mounted) return;
+                  cashPaid: total,
+                  cardPaid: 0.0,
+                );
+          } else {
+            await ref
+                .read(orderProvider.notifier)
+                .submitOrder(
+                  paymentMethod: 'cash+card',
+                  discount: selectedDiscount,
+                  cashPaid: total - remaining,
+                  cardPaid: remaining,
+                );
+          }
+        }
+      } else {
+        await ref
+            .read(orderProvider.notifier)
+            .submitOrder(
+              paymentMethod: paymentMethod,
+              discount: selectedDiscount,
+              cashPaid: 0.0,
+              cardPaid: order.finalTotal,
+            );
+      }
+    } finally {
+      if (isPrintChecked && mounted) {
         await printOrderSilently(context: context, ref: ref, order: order);
       }
+      if (editingOrder != null) {
+        final notifier = ref.read(submittedOrdersProvider.notifier);
+        await notifier.deleteOrder(editingOrder!.id);
+      }
+
       setState(() {
         selectedDiscount = null;
         isPrintChecked = false;
       });
-      return;
     }
-
-    await ref
-        .read(orderProvider.notifier)
-        .submitOrder(paymentMethod: paymentMethod, discount: selectedDiscount);
-
-    if (isPrintChecked) {
-      if (!mounted) return;
-      await printOrderSilently(context: context, ref: ref, order: order);
-    }
-    if (editingOrder != null) {
-      final notifier = ref.read(submittedOrdersProvider.notifier);
-      await notifier.deleteOrder(editingOrder!.id);
-    }
-
-    setState(() {
-      selectedDiscount = null;
-      isPrintChecked = false;
-    });
   }
 
   void onCategorySelect(String categoryId) {

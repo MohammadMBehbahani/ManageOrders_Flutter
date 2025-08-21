@@ -73,7 +73,12 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
   }
 
   /// Updated to accept payment method
-  Order getDraftOrder({Discount? discount, required String paymentMethod}) {
+  Order getDraftOrder({
+    Discount? discount,
+    required String paymentMethod,
+    required double cashPaid,
+    required double cardPaid,
+  }) {
     final total = calculateTotal(state, discount);
     return Order(
       id: const Uuid().v4(),
@@ -81,6 +86,8 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
       discount: discount,
       finalTotal: total,
       paymentMethod: paymentMethod,
+      cashPaid: cashPaid,
+      cardPaid: cardPaid,
     );
   }
 
@@ -88,10 +95,14 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
   Future<Order> submitOrder({
     Discount? discount,
     required String paymentMethod,
+    required double cashPaid,
+    required double cardPaid,
   }) async {
     final newOrder = getDraftOrder(
       discount: discount,
       paymentMethod: paymentMethod,
+      cashPaid: cashPaid,
+      cardPaid: cardPaid,
     );
     // ✅ Save order to SQLite
     await OrderDatabase.insertOrder(newOrder);

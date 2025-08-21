@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/widgets/number_pad.dart';
-import 'package:manageorders/models/order.dart';
 import 'package:manageorders/widgets/printer_cashdrawer_manager.dart';
 import 'package:manageorders/widgets/time_display_widget.dart'; // if you have it
 
 class CashPaymentScreen extends ConsumerStatefulWidget {
   final double totalAmount;
-  final Future<Order> Function() onSubmit;
-
   const CashPaymentScreen({
     super.key,
-    required this.totalAmount,
-    required this.onSubmit,
+    required this.totalAmount
   });
 
   @override
@@ -62,8 +58,8 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
     }
     try {
       if (!mounted) return;
-      final order = await widget.onSubmit(); // ✅ call submit
-      
+     
+
       if (cash != null && cash >= widget.totalAmount) {
         final change = (cash - widget.totalAmount).toStringAsFixed(2);
         setState(() {
@@ -78,40 +74,47 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
             content: Text("£$change", style: TextStyle(fontSize: 120)),
             actions: [
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(context).pop(); // close change dialog
-                  Navigator.of(context).pop(order);
+                  Navigator.of(context).pop(widget.totalAmount);
                 },
                 child: const Text("OK", style: TextStyle(fontSize: 30)),
               ),
             ],
           ),
-        ).then((value) {
-          // If the dialog was dismissed by tapping outside, also pop the payment screen:
-          if (value == null && mounted) {
-            Navigator.of(context).pop(order);
-          }
-        });
+        );
       } else if (cash != null && cash < widget.totalAmount) {
+        final remaining = widget.totalAmount - cash;
         if (!mounted) return;
         showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (_) => AlertDialog(
-            title: const Text("Invalid Amount"),
-            content: Text("£$cash is lower that total Amount"),
+            title: const Text("Partial Payment"),
+            content: Text(
+              "Received £$cash\nRemaining: £$remaining\n\nDo you want to pay the rest by card?",
+              style: const TextStyle(fontSize: 22),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text("OK"),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(); // close dialog
+                   Navigator.of(context).pop(remaining);
+                },
+                child: const Text("Pay Remaining by Card"),
               ),
             ],
           ),
         );
       } else {
         if (!mounted) return;
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(widget.totalAmount);
       }
     } finally {
       if (mounted) {
@@ -148,7 +151,7 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 12),
-             _isLoading
+            _isLoading
                 ? const CircularProgressIndicator() // ✅ show loader
                 : ElevatedButton(
                     onPressed: _handleSubmit,

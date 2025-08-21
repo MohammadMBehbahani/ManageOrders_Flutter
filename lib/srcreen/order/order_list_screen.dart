@@ -280,11 +280,8 @@ class _SubmittedOrdersScreenState extends ConsumerState<SubmittedOrdersScreen>
                           totalRefund += order.finalTotal;
                         } else {
                           total += order.finalTotal;
-                          if (order.paymentMethod == 'cash') {
-                            totalCash += order.finalTotal;
-                          } else if (order.paymentMethod == 'card') {
-                            totalCard += order.finalTotal;
-                          }
+                          totalCash += order.cashPaid ?? 0.0;
+                          totalCard += order.cardPaid ?? 0.0;
                         }
                       }
 

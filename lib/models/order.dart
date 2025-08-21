@@ -7,6 +7,8 @@ class Order {
   final Discount? discount;
   final double finalTotal;
   final String paymentMethod; // "cash" or "card"
+  final double? cashPaid;
+  final double? cardPaid;
   final DateTime createdAt;
   final String? status;
 
@@ -16,6 +18,8 @@ class Order {
     this.discount,
     required this.finalTotal,
     required this.paymentMethod,
+    this.cashPaid,
+    this.cardPaid,
     DateTime? createdAt,
     this.status,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -32,6 +36,8 @@ class Order {
           ? Discount.fromMap(map['discount'])
           : null,
       finalTotal: map['finalTotal'] ?? 0.0,
+      cashPaid: map['cashPaid'] != null ? (map['cashPaid'] as num).toDouble() : null,
+      cardPaid: map['cardPaid'] != null ? (map['cardPaid'] as num).toDouble() : null,
       paymentMethod: map['paymentMethod'] ?? 'cash',
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
@@ -46,9 +52,11 @@ class Order {
       'items': items.map((e) => e.toMap()).toList(),
       'discount': discount?.toMap(),
       'finalTotal': finalTotal,
+      'cashPaid': cashPaid,
+      'cardPaid': cardPaid,
       'paymentMethod': paymentMethod,
       'createdAt': createdAt.toIso8601String(),
-      'status': status
+      'status': status,
     };
   }
 }

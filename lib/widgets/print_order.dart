@@ -41,9 +41,9 @@ class PrintOrderWidget extends ConsumerWidget {
     PdfPageFormat? format,
   ]) async {
     final shopDetailsAsync = await ref.watch(shopDetailsProvider.future);
-    const double lineHeight = 20.0;
-    const double headerHeight = 200.0;
-    const double footerHeight = 40.0;
+    const double lineHeight = 50.0;
+    const double headerHeight = 400.0;
+    const double footerHeight = 200.0;
 
     double calculateReceiptHeight(int itemCount) {
       return headerHeight + (itemCount * lineHeight) + footerHeight;

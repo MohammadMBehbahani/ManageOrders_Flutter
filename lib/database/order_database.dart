@@ -15,7 +15,7 @@ class OrderDatabase {
     final path = join(await getDatabasesPath(), 'order.db');
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE orders (
@@ -23,6 +23,8 @@ class OrderDatabase {
             items TEXT,
             discount TEXT,
             finalTotal REAL,
+            cashPaid REAL,
+            cardPaid REAL,
             paymentMethod TEXT,
             createdAt TEXT,
             status TEXT
@@ -40,6 +42,10 @@ class OrderDatabase {
         if (oldVersion < 4) {
           await db.execute('ALTER TABLE orders ADD COLUMN status TEXT');
         }
+        if (oldVersion < 5) {
+          await db.execute('ALTER TABLE orders ADD COLUMN cashPaid REAL');
+          await db.execute('ALTER TABLE orders ADD COLUMN cardPaid REAL');
+        }
         // Handle future upgrades here if needed
       },
     );
@@ -53,9 +59,11 @@ class OrderDatabase {
         'items': jsonEncode(order.items.map((e) => e.toMap()).toList()),
         'discount': jsonEncode(order.discount?.toMap()),
         'finalTotal': order.finalTotal,
+        'cashPaid': order.cashPaid,
+        'cardPaid': order.cardPaid,
         'paymentMethod': order.paymentMethod,
         'createdAt': order.createdAt.toIso8601String(),
-        'status': order.status
+        'status': order.status,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       //print('Error submitting order: $e');

@@ -5,7 +5,7 @@ import 'package:manageorders/models/discount.dart';
 import 'package:manageorders/providers/manage_left_view_provider.dart';
 import 'package:manageorders/srcreen/shared/scroll_with_touch.dart';
 
-class OrderRightPanel extends ConsumerWidget {
+class OrderRightPanel extends ConsumerStatefulWidget {
   final List<OrderItem> orderItems;
   final Discount? selectedDiscount;
   final double finalTotal;
@@ -17,6 +17,8 @@ class OrderRightPanel extends ConsumerWidget {
   final VoidCallback onSubmitCard;
   final VoidCallback onAddItem;
 
+  final void Function(int itemIndex) onAddItemDiscount;
+  final void Function(int itemIndex) onRemoveItemDiscount;
   final void Function(int itemIndex) onRemoveItem;
   final void Function(int itemIndex) onquantityInc;
   final void Function(int itemIndex) onquantityDec;
@@ -25,6 +27,8 @@ class OrderRightPanel extends ConsumerWidget {
 
   const OrderRightPanel({
     super.key,
+    required this.onAddItemDiscount,
+    required this.onRemoveItemDiscount,
     required this.orderItems,
     required this.selectedDiscount,
     required this.finalTotal,
@@ -41,13 +45,26 @@ class OrderRightPanel extends ConsumerWidget {
     required this.onRemoveTopping,
     required this.onRemoveExtra,
   });
+  @override
+  ConsumerState<OrderRightPanel> createState() => _OrderRightPanelState();
+}
+
+class _OrderRightPanelState extends ConsumerState<OrderRightPanel> {
+  bool _isLoadingCard = false;
+
+  Future _handleSubmitCard() async {
+    setState(() => _isLoadingCard = true);
+    try {
+      widget.onSubmitCard;
+    } finally {
+      if (mounted) setState(() => _isLoadingCard = false);
+    }
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final view = ref.watch(manageLeftViewProvider).value;
-    final tottalfontsiz =
-        (view == null ||
-            view.tottalfontsize <= 0)
+    final tottalfontsiz = (view == null || view.tottalfontsize <= 0)
         ? 18.0
         : view.tottalfontsize.toDouble();
 
@@ -58,9 +75,9 @@ class OrderRightPanel extends ConsumerWidget {
           Expanded(
             child: ScrollWithTouch(
               child: ListView.builder(
-                itemCount: orderItems.length,
+                itemCount: widget.orderItems.length,
                 itemBuilder: (_, i) {
-                  final item = orderItems[i];
+                  final item = widget.orderItems[i];
                   return Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12),
@@ -81,26 +98,46 @@ class OrderRightPanel extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text('£${item.totalPrice.toStringAsFixed(2)}'),
+                              item.itemDiscount > 0
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear,
+                                        color: Colors.red,
+                                      ),
+                                      tooltip: "Remove item discount",
+                                      onPressed: () => widget.onRemoveItemDiscount(
+                                        i,
+                                      ), // or onRemoveItemDiscount if you separate
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(
+                                        Icons.percent,
+                                        color: Colors.blue,
+                                      ),
+                                      tooltip: "Add item discount",
+                                      onPressed: () =>
+                                          widget.onAddItemDiscount(i),
+                                    ),
                               IconButton(
                                 icon: const Icon(
                                   Icons.remove,
                                   color: Colors.red,
                                 ),
-                                onPressed: () => onquantityDec(i),
+                                onPressed: () => widget.onquantityDec(i),
                               ),
                               IconButton(
                                 icon: const Icon(
                                   Icons.add,
                                   color: Colors.green,
                                 ),
-                                onPressed: () => onquantityInc(i),
+                                onPressed: () => widget.onquantityInc(i),
                               ),
                               IconButton(
                                 icon: const Icon(
                                   Icons.delete_forever,
                                   color: Colors.red,
                                 ),
-                                onPressed: () => onRemoveItem(i),
+                                onPressed: () => widget.onRemoveItem(i),
                               ),
                             ],
                           ),
@@ -118,7 +155,8 @@ class OrderRightPanel extends ConsumerWidget {
                                     Icons.delete,
                                     color: Colors.red,
                                   ),
-                                  onPressed: () => onRemoveTopping(i, tIndex),
+                                  onPressed: () =>
+                                      widget.onRemoveTopping(i, tIndex),
                                 ),
                               );
                             }),
@@ -134,7 +172,8 @@ class OrderRightPanel extends ConsumerWidget {
                                     Icons.delete,
                                     color: Colors.red,
                                   ),
-                                  onPressed: () => onRemoveExtra(i, eIndex),
+                                  onPressed: () =>
+                                      widget.onRemoveExtra(i, eIndex),
                                 ),
                               );
                             }),
@@ -147,20 +186,20 @@ class OrderRightPanel extends ConsumerWidget {
             ),
           ),
           const Divider(thickness: 10),
-          if (selectedDiscount != null)
+          if (widget.selectedDiscount != null)
             Padding(
               padding: const EdgeInsets.all(8),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'Discount Applied: ${selectedDiscount!.type} ${selectedDiscount!.value}',
+                      'Discount Applied: ${widget.selectedDiscount!.type} ${widget.selectedDiscount!.value}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.clear),
-                    onPressed: () => onRemoveDiscount(),
+                    onPressed: () => widget.onRemoveDiscount(),
                   ),
                 ],
               ),
@@ -169,7 +208,7 @@ class OrderRightPanel extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              'Total: £${finalTotal.toStringAsFixed(2)}',
+              'Total: £${widget.finalTotal.toStringAsFixed(2)}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: tottalfontsiz,
@@ -179,7 +218,10 @@ class OrderRightPanel extends ConsumerWidget {
 
           Row(
             children: [
-              Checkbox(value: isPrintChecked, onChanged: onPrintToggle),
+              Checkbox(
+                value: widget.isPrintChecked,
+                onChanged: widget.onPrintToggle,
+              ),
               const Text('Print'),
             ],
           ),
@@ -196,7 +238,7 @@ class OrderRightPanel extends ConsumerWidget {
                 ),
                 icon: const Icon(Icons.percent, size: 18),
                 label: const Text('Add Discount'),
-                onPressed: onAddDiscount,
+                onPressed: widget.onAddDiscount,
                 // _openDiscountDialog,
               ),
 
@@ -210,7 +252,7 @@ class OrderRightPanel extends ConsumerWidget {
                 ),
                 icon: const Icon(Icons.add_circle, size: 18),
                 label: const Text('Add item'),
-                onPressed: onAddItem, //(){},
+                onPressed: widget.onAddItem, //(){},
                 // _openDiscountDialog,
               ),
             ],
@@ -223,18 +265,24 @@ class OrderRightPanel extends ConsumerWidget {
             ),
             icon: const Icon(Icons.payment, size: 18),
             label: const Text('Submit Cash'),
-            onPressed: onSubmitCash,
+            onPressed: widget.onSubmitCash,
           ),
           SizedBox(height: 10),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              textStyle: const TextStyle(fontSize: 30),
-            ),
-            icon: const Icon(Icons.payment, size: 18),
-            label: const Text('Submit Card'),
-            onPressed: onSubmitCard,
-          ),
+
+          _isLoadingCard
+              ? const CircularProgressIndicator()
+              : ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(fontSize: 30),
+                  ),
+                  icon: const Icon(Icons.payment, size: 18),
+                  label: const Text('Submit Card'),
+                  onPressed: _handleSubmitCard,
+                ),
         ],
       ),
     );

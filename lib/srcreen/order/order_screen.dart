@@ -198,7 +198,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
           discount: selectedDiscount,
           paymentMethod: paymentMethod,
         );
-    if(order.finalTotal <= 0){
+    if (order.finalTotal <= 0) {
       return;
     }
     if (paymentMethod == 'cash') {
@@ -227,9 +227,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
       });
       return;
     }
+
     await ref
         .read(orderProvider.notifier)
         .submitOrder(paymentMethod: paymentMethod, discount: selectedDiscount);
+
     if (isPrintChecked) {
       if (!mounted) return;
       await printOrderSilently(context: context, ref: ref, order: order);
@@ -323,6 +325,33 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     });
   }
 
+  void removeItem(int index) {
+    // remove the item first
+    ref.read(orderProvider.notifier).removeItem(index);
+
+    // now get the updated state
+    final updatedItems = ref.read(orderProvider);
+
+    if (updatedItems.isEmpty) {
+      onRemoveDiscount();
+    }
+  }
+
+  Future<void> _openDiscountItem(int index) async {
+    final discount = await Navigator.push<Discount>(
+      context,
+      MaterialPageRoute(builder: (_) => const DiscountSelectScreen()),
+    );
+
+    if (discount != null) {
+      ref.read(orderProvider.notifier).applyItemDiscount(index, discount);
+    }
+  }
+
+  void onRemoveItemDiscount(int index) {
+    ref.read(orderProvider.notifier).removeItemDiscount(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoryProvider).valueOrNull ?? [];
@@ -342,30 +371,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         : products.where((p) => p.categoryId == selectedCategoryId).toList();
 
     // Calculate total with discount
-    double subtotal = 0.0;
-    for (var item in orderItems) {
-      double toppingTotal = 0.0;
-      if (item.toppings != null) {
-        toppingTotal = item.toppings!.fold(0, (sum, t) => sum + t.price);
-      }
-      double extraTotal = 0.0;
-      if (item.extras != null) {
-        extraTotal = item.extras!.fold(0, (sum, e) => sum + e.amount);
-      }
-      subtotal += (item.unitPrice + toppingTotal + extraTotal) * item.quantity;
-    }
-
-    double finalTotal = subtotal;
-    if (selectedDiscount != null) {
-      if (selectedDiscount!.type == 'percentage') {
-        finalTotal = subtotal * (1 - selectedDiscount!.value / 100);
-      } else if (selectedDiscount!.type == 'flat') {
-        finalTotal = (subtotal - selectedDiscount!.value).clamp(
-          0,
-          double.infinity,
-        );
-      }
-    }
 
     return Scaffold(
       backgroundColor: Color(0xFF1A1E24),
@@ -381,7 +386,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: TimeDisplayWidget(),
           ),
-        ]
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -415,6 +420,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 child: Container(
                   color: Colors.white,
                   child: OrderRightPanel(
+                    onAddItemDiscount: (index) => _openDiscountItem(index),
+                    onRemoveItemDiscount: (index) =>
+                        onRemoveItemDiscount(index),
                     onquantityInc: (index) => ref
                         .read(orderProvider.notifier)
                         .increaseQuantity(index),
@@ -424,7 +432,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     orderItems: orderItems,
                     onAddItem: _addSimpleItem,
                     selectedDiscount: selectedDiscount,
-                    finalTotal: finalTotal,
+                    finalTotal: ref
+                        .watch(orderProvider.notifier)
+                        .calculateTotal(orderItems, selectedDiscount),
                     isPrintChecked: isPrintChecked,
                     onPrintToggle: (value) =>
                         setState(() => isPrintChecked = value ?? false),
@@ -432,8 +442,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     onRemoveDiscount: onRemoveDiscount,
                     onSubmitCash: () async => await _submitOrder('cash'),
                     onSubmitCard: () async => _submitOrder('card'),
-                    onRemoveItem: (index) =>
-                        ref.read(orderProvider.notifier).removeItem(index),
+                    onRemoveItem: (index) => removeItem(index),
                     onRemoveTopping: (itemIndex, toppingIndex) {
                       final item = orderItems[itemIndex];
                       final newToppings = [...item.toppings!]

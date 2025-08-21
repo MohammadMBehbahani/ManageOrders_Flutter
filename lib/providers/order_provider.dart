@@ -32,7 +32,7 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
   void decreaseQuantity(int index) {
     final newList = [...state];
     final item = newList[index];
-    if  (item.quantity <= 1){
+    if (item.quantity <= 1) {
       return;
     }
     newList[index] = item.copyWith(quantity: item.quantity - 1);
@@ -47,9 +47,34 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
     state = [];
   }
 
+  void applyItemDiscount(int index, Discount discount) {
+    final newList = [...state];
+    final item = newList[index];
+
+    double discountValue = 0.0;
+
+    if (discount.type == "percentage") {
+      discountValue = item.unitPrice * (discount.value / 100);
+    } else if (discount.type == "flat") {
+      discountValue = discount.value;
+    }
+
+    newList[index] = item.copyWith(itemDiscount: discountValue);
+    state = newList;
+  }
+
+  void removeItemDiscount(int index) {
+    final newList = [...state];
+    final item = newList[index];
+
+    // reset itemDiscount back to 0
+    newList[index] = item.copyWith(itemDiscount: 0.0);
+    state = newList;
+  }
+
   /// Updated to accept payment method
   Order getDraftOrder({Discount? discount, required String paymentMethod}) {
-    final total = _calculateTotal(state, discount);
+    final total = calculateTotal(state, discount);
     return Order(
       id: const Uuid().v4(),
       items: state,
@@ -75,7 +100,7 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
     return newOrder;
   }
 
-  double _calculateTotal(List<OrderItem> items, Discount? discount) {
+  double calculateTotal(List<OrderItem> items, Discount? discount) {
     double subtotal = items.fold(0.0, (sum, item) {
       final toppingTotal = (item.toppings ?? []).fold(
         0.0,
@@ -85,7 +110,13 @@ class OrderNotifier extends Notifier<List<OrderItem>> {
         0.0,
         (prev, e) => prev + e.amount,
       );
-      return sum + (item.unitPrice + toppingTotal + extraTotal) * item.quantity;
+      // apply per-item discount (absolute)
+      final itemBasePrice = item.unitPrice + toppingTotal + extraTotal;
+      final itemTotal =
+          (itemBasePrice - item.itemDiscount).clamp(0, double.infinity) *
+          item.quantity;
+
+      return sum + itemTotal;
     });
 
     if (discount != null) {

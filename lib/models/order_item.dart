@@ -10,6 +10,7 @@ class OrderItem {
   final List<OrderTopping>? toppings; 
   final int quantity;
   final double unitPrice;
+  final double itemDiscount;
   final double totalPrice;
 
   OrderItem({
@@ -18,8 +19,9 @@ class OrderItem {
     this.extras,
     this.toppings,
     required this.quantity,
-    required this.unitPrice
-  }): totalPrice = unitPrice * quantity;
+    required this.unitPrice,
+    this.itemDiscount = 0.0
+  }): totalPrice = (unitPrice * quantity) - (itemDiscount * quantity);
 
    OrderItem copyWith({
     Product? product,
@@ -28,6 +30,7 @@ class OrderItem {
     List<OrderTopping>? toppings,
     int? quantity,
     double? unitPrice,
+    double? itemDiscount,
   }) {
     return OrderItem(
       product: product ?? this.product,
@@ -36,6 +39,7 @@ class OrderItem {
       toppings: toppings ?? this.toppings,
       quantity: quantity ?? this.quantity,
       unitPrice: unitPrice ?? this.unitPrice,
+      itemDiscount: itemDiscount ?? this.itemDiscount,
     );
   }
 
@@ -51,6 +55,7 @@ class OrderItem {
               .toList(),
       quantity: map['quantity'],
       unitPrice: map['unitPrice'],
+      itemDiscount: (map['itemDiscount'] ?? 0.0).toDouble()
     );
   }
 
@@ -62,6 +67,7 @@ class OrderItem {
       'toppings': toppings?.map((e) => e.toMap()).toList(),
       'quantity': quantity,
       'unitPrice': unitPrice,
+      'itemDiscount': itemDiscount,
       'totalPrice': totalPrice,
     };
   }

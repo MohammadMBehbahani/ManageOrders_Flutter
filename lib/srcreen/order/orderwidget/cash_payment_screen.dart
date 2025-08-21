@@ -22,6 +22,7 @@ class CashPaymentScreen extends ConsumerStatefulWidget {
 class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
   String givenCash = '';
   double? returnAmount;
+  bool _isLoading = false;
 
   void _onKeyTap(String key) {
     setState(() {
@@ -38,10 +39,18 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
   }
 
   Future<void> _handleSubmit() async {
-    if(widget.totalAmount <= 0){
-       return;
+    if (widget.totalAmount <= 0) {
+      return;
     }
+
     final cash = double.tryParse(givenCash);
+    if (cash != null && cash <= 0) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // ✅ start loading
+    });
 
     try {
       await openCashDrawer(
@@ -51,70 +60,80 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
     } catch (e) {
       debugPrint('⚠️ Failed to open drawer: $e'); // Log it or ignore silently
     }
-
-    if (!mounted) return;
-    final order = await widget.onSubmit(); // ✅ call submit
-    if (cash != null && cash >= widget.totalAmount) {
-      final change = (cash - widget.totalAmount).toStringAsFixed(2);
-      setState(() {
-        returnAmount = double.parse(change);
-      });
+    try {
       if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (_) => AlertDialog(
-          title: const Text("Change to return"),
-          content: Text("£$change", style: TextStyle(fontSize: 120),),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // close change dialog
-                Navigator.of(context).pop(order);
-              },
-              child: const Text("OK", style: TextStyle(fontSize: 30)),
-            ),
-          ],
-        ),
-      ).then((value) {
-        // If the dialog was dismissed by tapping outside, also pop the payment screen:
-        if (value == null && mounted) {
-          Navigator.of(context).pop(order);
-        }
-      });
-    } else if (cash != null && cash < widget.totalAmount) {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Invalid Amount"),
-          content: Text("£$cash is lower that total Amount"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    } else {
-      if (!mounted) return;
-      Navigator.of(context).pop();
+      final order = await widget.onSubmit(); // ✅ call submit
+      
+      if (cash != null && cash >= widget.totalAmount) {
+        final change = (cash - widget.totalAmount).toStringAsFixed(2);
+        setState(() {
+          returnAmount = double.parse(change);
+        });
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (_) => AlertDialog(
+            title: const Text("Change to return"),
+            content: Text("£$change", style: TextStyle(fontSize: 120)),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // close change dialog
+                  Navigator.of(context).pop(order);
+                },
+                child: const Text("OK", style: TextStyle(fontSize: 30)),
+              ),
+            ],
+          ),
+        ).then((value) {
+          // If the dialog was dismissed by tapping outside, also pop the payment screen:
+          if (value == null && mounted) {
+            Navigator.of(context).pop(order);
+          }
+        });
+      } else if (cash != null && cash < widget.totalAmount) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Invalid Amount"),
+            content: Text("£$cash is lower that total Amount"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // ✅ stop loading
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cash Payment'),
-      actions: const [
+      appBar: AppBar(
+        title: const Text('Cash Payment'),
+        actions: const [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: TimeDisplayWidget(),
           ),
-        ]),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -129,6 +148,15 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 12),
+             _isLoading
+                ? const CircularProgressIndicator() // ✅ show loader
+                : ElevatedButton(
+                    onPressed: _handleSubmit,
+                    child: const Text(
+                      'Submit Payment',
+                      style: TextStyle(fontSize: 50, color: Colors.green),
+                    ),
+                  ),
             ElevatedButton(
               onPressed: _handleSubmit,
               child: const Text(

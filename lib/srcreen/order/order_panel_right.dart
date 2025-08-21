@@ -55,7 +55,7 @@ class _OrderRightPanelState extends ConsumerState<OrderRightPanel> {
   Future _handleSubmitCard() async {
     setState(() => _isLoadingCard = true);
     try {
-      widget.onSubmitCard;
+      widget.onSubmitCard();
     } finally {
       if (mounted) setState(() => _isLoadingCard = false);
     }

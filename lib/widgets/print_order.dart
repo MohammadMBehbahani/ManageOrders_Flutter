@@ -25,9 +25,8 @@ class PrintOrderWidget extends ConsumerWidget {
       children: [
         pw.Row(
           children: [
-            pw.Text('${item.quantity} x ${item.subProductName}'),
-            pw.SizedBox(width: 50),
-            pw.Text('£${item.unitPrice.toStringAsFixed(2)}'),
+            pw.Text('${item.quantity} x ${item.subProductName} - £${item.unitPrice.toStringAsFixed(2)}'),
+            
           ],
         ),
       ],
@@ -173,11 +172,13 @@ class PrintOrderWidget extends ConsumerWidget {
                                 pw.Row(
                                   children: [
                                     pw.Text(
-                                      '${item.quantity} x ${item.subProductName}',
+                                      '${item.quantity} x ${item.subProductName} - £${item.unitPrice.toStringAsFixed(2)}',
                                     ),
-                                    pw.SizedBox(width: 50),
+                                    if (item.itemDiscount > 0)
+                                    pw.SizedBox(width: 5),
+                                    if (item.itemDiscount > 0)
                                     pw.Text(
-                                      '£${item.unitPrice.toStringAsFixed(2)}',
+                                      '- discount - £${item.itemDiscount}',
                                     ),
                                   ],
                                 ),
@@ -256,27 +257,20 @@ class PrintOrderWidget extends ConsumerWidget {
 
               pw.Row(
                 children: [
-                  pw.Text('Subtotal:'),
-                  pw.SizedBox(width: 20),
-                  pw.Text('£${subtotal.toStringAsFixed(2)}'),
-                  pw.SizedBox(height: 10),
+                  pw.Text('Subtotal: £${subtotal.toStringAsFixed(2)}'),
+                  
                 ],
               ),
               if (order.discount != null)
                 pw.Row(
                   children: [
-                    pw.Text('Discount ($discountText):'),
-                    pw.SizedBox(width: 50),
-                    pw.Text('-£${discountAmount.toStringAsFixed(2)}'),
-                    pw.SizedBox(height: 8),
+                    pw.Text('Discount ($discountText): £${discountAmount.toStringAsFixed(2)}'),
+                    
                   ],
                 ),
               pw.Row(
                 children: [
-                  pw.Text('Total:'),
-                  pw.SizedBox(width: 36),
-                  pw.Text('£${order.finalTotal.toStringAsFixed(2)}'),
-                  pw.SizedBox(height: 8),
+                  pw.Text('Total: £${order.finalTotal.toStringAsFixed(2)}'),
                 ],
               ),
 

@@ -157,13 +157,6 @@ class _CashPaymentScreenState extends ConsumerState<CashPaymentScreen> {
                       style: TextStyle(fontSize: 50, color: Colors.green),
                     ),
                   ),
-            ElevatedButton(
-              onPressed: _handleSubmit,
-              child: const Text(
-                'Submit Payment',
-                style: TextStyle(fontSize: 50, color: Colors.green),
-              ),
-            ),
             const SizedBox(height: 12),
             Expanded(child: NumberPad(onKeyTap: _onKeyTap)),
           ],

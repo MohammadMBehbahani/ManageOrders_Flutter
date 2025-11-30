@@ -1,6 +1,4 @@
-//import 'dart:io';
-
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/srcreen/category_screen.dart';
 import 'package:manageorders/srcreen/drawer_log_screen.dart';
@@ -21,13 +19,13 @@ final RouteObserver<ModalRoute<void>> routeObserver =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-  //   await windowManager.ensureInitialized();
-  //   WindowOptions winopt = WindowOptions(fullScreen: true);
-  //   windowManager.waitUntilReadyToShow(winopt, () async {
-  //     await windowManager.setFullScreen(true);
-  //   });
-  // }
+  
+    await windowManager.ensureInitialized();
+     WindowOptions winopt = WindowOptions(fullScreen: true);
+     windowManager.waitUntilReadyToShow(winopt, () async {
+       await windowManager.setFullScreen(true);
+    });
+  
 
   
   sqfliteFfiInit();

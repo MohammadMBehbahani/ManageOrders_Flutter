@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:manageorders/srcreen/shared/layout_screen.dart';
@@ -48,7 +47,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-        if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+       
           Positioned(
             top: 10,
             right: 10,
@@ -57,7 +56,10 @@ class HomeScreen extends StatelessWidget {
                
                 IconButton(
                   onPressed: () async {
+                    await windowManager.setPreventClose(false);
                     await windowManager.close();
+                    // or, if you want to force close:
+                    // await windowManager.destroy();
                   },
                   icon: Icon(Icons.close),
                 ),

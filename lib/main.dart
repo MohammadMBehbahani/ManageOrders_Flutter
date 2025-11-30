@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:manageorders/srcreen/category_screen.dart';
@@ -12,14 +13,31 @@ import 'package:manageorders/srcreen/product/product_screen.dart';
 import 'package:manageorders/srcreen/shope_details_screen.dart';
 import 'package:manageorders/srcreen/topping_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:window_manager/window_manager.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 void main() async {
- 
+ WidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
    
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+
+    const windowOptions = WindowOptions(
+      title: 'Manage Orders',
+      // don't set fullScreen here yet, we'll do it explicitly below
+    );
+
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      // Show, then make full screen and focus
+      await windowManager.show();
+      await windowManager.setFullScreen(true); // ⬅ fullscreen on open
+      await windowManager.focus();
+    });
+  }
   runApp(const ProviderScope(child: ManageOrdersApp()));
 
 // runApp(const MyTestApp());

@@ -71,7 +71,7 @@ class CategoryDatabase {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       priority INTEGER,
-      color INTEGER
+      color TEXT
     )
   ''');
   }

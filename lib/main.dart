@@ -12,28 +12,13 @@ import 'package:manageorders/srcreen/product/product_screen.dart';
 import 'package:manageorders/srcreen/shope_details_screen.dart';
 import 'package:manageorders/srcreen/topping_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:window_manager/window_manager.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 void main() async {
-  // SQLite FFI backend
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-
-    // Window manager init
-    await windowManager.ensureInitialized();
-
-    const windowOptions = WindowOptions(
-      title: 'Manage Orders',
-      fullScreen: true, // or false if you want a normal window
-    );
-
-    // IMPORTANT: await this and call show() + focus()
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+ 
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
    
   runApp(const ProviderScope(child: ManageOrdersApp()));
 

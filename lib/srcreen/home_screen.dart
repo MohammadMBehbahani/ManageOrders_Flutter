@@ -48,24 +48,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
        
-          Positioned(
-            top: 10,
-            right: 10,
-            child: Row(
-              children: [
-               
-                IconButton(
-                  onPressed: () async {
-                    await windowManager.setPreventClose(false);
-                    await windowManager.close();
-                    // or, if you want to force close:
-                    // await windowManager.destroy();
-                  },
-                  icon: Icon(Icons.close),
-                ),
-              ],
-            ),
-          ),
+          
       ],
     );
   }

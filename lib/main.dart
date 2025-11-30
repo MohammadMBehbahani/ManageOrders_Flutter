@@ -19,7 +19,7 @@ import 'package:window_manager/window_manager.dart';
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
   //   await windowManager.ensureInitialized();
@@ -29,10 +29,10 @@ void main() async {
   //   });
   // }
 
-  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-  //   sqfliteFfiInit();
-  //   databaseFactory = databaseFactoryFfi;
-  // }
+  
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+   
   runApp(const ProviderScope(child: ManageOrdersApp()));
 
 // runApp(const MyTestApp());

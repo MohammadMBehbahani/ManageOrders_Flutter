@@ -17,19 +17,23 @@ import 'package:window_manager/window_manager.dart';
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // SQLite FFI backend
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
 
-  
+    // Window manager init
     await windowManager.ensureInitialized();
-     WindowOptions winopt = WindowOptions(fullScreen: true);
-     windowManager.waitUntilReadyToShow(winopt, () async {
-       await windowManager.setFullScreen(true);
-    });
-  
 
-  
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+    const windowOptions = WindowOptions(
+      title: 'Manage Orders',
+      fullScreen: true, // or false if you want a normal window
+    );
+
+    // IMPORTANT: await this and call show() + focus()
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
    
   runApp(const ProviderScope(child: ManageOrdersApp()));
 

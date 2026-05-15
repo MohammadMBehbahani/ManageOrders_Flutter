@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OpenDrawer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e93aca60ac9fa529f70dc2874f0e18b50b360e9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+05ae75a83ec74479cbb0666d30ff80cf60077714")]
 [assembly: System.Reflection.AssemblyProductAttribute("OpenDrawer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OpenDrawer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
